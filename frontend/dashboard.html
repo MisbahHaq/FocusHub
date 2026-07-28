@@ -1925,13 +1925,6 @@
             lucide.createIcons();
         }
 
-        function formatDateRange(start, end) {
-            const s = new Date(start);
-            const e = new Date(end);
-            const opts = { month: 'short', day: 'numeric' };
-            return `${s.toLocaleDateString('en-US', opts)} – ${e.toLocaleDateString('en-US', opts)}`;
-        }
-
         window.renderSeasonsView = renderSeasonsView;
         window.formatTimeHMS = formatTimeHMS;
         window.formatHoursAndMins = formatHoursAndMins;
