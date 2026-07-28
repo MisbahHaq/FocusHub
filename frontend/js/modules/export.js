@@ -4,9 +4,8 @@
  * Supports web browser download blobs and Tauri native file dialogs.
  */
 
-export function isTauriEnv() {
-    return typeof window !== 'undefined' && Boolean(window.__TAURI_INTERNALS__ || window.__TAURI__);
-}
+import { isTauriEnv } from '../utils/tauri.js';
+export { isTauriEnv };
 
 export async function exportUserData(adapter) {
     const data = await adapter.getAllData();

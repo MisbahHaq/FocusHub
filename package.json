@@ -1,4 +1,13 @@
 {
+  "name": "focus-synergy",
+  "version": "0.1.0",
+  "description": "Track focus loops. Build lasting habits.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Focus Synergy Contributors",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "tauri": "tauri",
     "dev": "tauri dev",
@@ -6,16 +15,22 @@
     "build:env": "node scripts/build-frontend.js",
     "static-server": "node scripts/static-server.js",
     "deploy:rules": "firebase deploy --only firestore:rules",
-    "test:rules": "firebase emulators:exec --only firestore 'node scripts/test-rules.js'"
+    "test:rules": "firebase emulators:exec --only firestore 'node scripts/test-rules.js'",
+    "lint": "eslint frontend/js/",
+    "lint:fix": "eslint frontend/js/ --fix",
+    "format": "prettier --write 'frontend/js/**/*.js'",
+    "format:check": "prettier --check 'frontend/js/**/*.js'"
   },
   "dependencies": {
-    "firebase": "^12.13.0",
-    "ico": "^0.3.3",
-    "png-to-ico": "^3.0.2",
-    "sharp": "^0.35.3"
+    "firebase": "^12.13.0"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.5.0",
-    "@firebase/rules-unit-testing": "^3.0.0"
+    "@firebase/rules-unit-testing": "^3.0.0",
+    "ico": "^0.3.3",
+    "png-to-ico": "^3.0.2",
+    "sharp": "^0.35.3",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0"
   }
 }

@@ -41,27 +41,57 @@ service cloud.firestore {
 
       // Notes workspace
       match /notes/{noteId} {
-        allow read, write: if isOwner(uid);
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && request.resource.data.keys().hasAll(['title', 'body', 'updatedAt'])
+          && request.resource.data.title is string
+          && request.resource.data.title.size() <= 500
+          && request.resource.data.body is string
+          && request.resource.data.body.size() <= 100000;
+        allow delete: if isOwner(uid);
       }
 
       // Seasons
       match /seasons/{seasonId} {
-        allow read, write: if isOwner(uid);
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && request.resource.data.keys().hasAll(['title', 'startDate', 'endDate', 'durationWeeks'])
+          && request.resource.data.title is string
+          && request.resource.data.title.size() <= 200
+          && request.resource.data.durationWeeks is number
+          && request.resource.data.durationWeeks >= 1
+          && request.resource.data.durationWeeks <= 26;
+        allow delete: if isOwner(uid);
       }
 
       // Backlog entries
       match /backlog/{entryId} {
-        allow read, write: if isOwner(uid);
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && request.resource.data.keys().hasAll(['title', 'createdAt'])
+          && request.resource.data.title is string
+          && request.resource.data.title.size() <= 500;
+        allow delete: if isOwner(uid);
       }
 
       // Daily energy mode logs
       match /dailyLogs/{logId} {
-        allow read, write: if isOwner(uid);
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && request.resource.data.keys().hasAll(['task', 'energyType', 'timestamp', 'userId'])
+          && request.resource.data.task is string
+          && request.resource.data.task.size() <= 500
+          && request.resource.data.energyType in ['production', 'consumption'];
+        allow delete: if isOwner(uid);
       }
 
       // Habit completion logs
       match /habitLogs/{logId} {
-        allow read, write: if isOwner(uid);
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && request.resource.data.keys().hasAll(['completed', 'date'])
+          && request.resource.data.completed is bool;
+        allow delete: if isOwner(uid);
       }
 
       // Metadata collection (activeTimer, settings, etc.)

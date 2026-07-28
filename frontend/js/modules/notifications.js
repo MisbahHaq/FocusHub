@@ -6,9 +6,7 @@
 let permissionRequested = false;
 let notifiedTimerIds = new Set();
 
-export function isTauriEnv() {
-    return typeof window !== 'undefined' && Boolean(window.__TAURI_INTERNALS__ || window.__TAURI__);
-}
+import { isTauriEnv } from '../utils/tauri.js';
 
 export async function requestNotificationPermission() {
     if (permissionRequested) return true;

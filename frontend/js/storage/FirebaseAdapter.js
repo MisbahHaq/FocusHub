@@ -18,7 +18,6 @@ export class FirebaseAdapter extends StorageAdapter {
     async init() {
         if (this.db && !this._persistenceAttempted) {
             this._persistenceAttempted = true;
-            console.log('[FB-ADAPTER] init() starting, attempting IndexedDB persistence');
             try {
                 const timeoutPromise = new Promise((_, reject) =>
                     setTimeout(() => reject(new Error('persistence-timeout')), 4000)
@@ -27,7 +26,6 @@ export class FirebaseAdapter extends StorageAdapter {
                     enableIndexedDbPersistence(this.db),
                     timeoutPromise
                 ]).then(() => {
-                    console.log('[FB-ADAPTER] IndexedDB persistence enabled successfully');
                 }).catch((err) => {
                     if (err.message !== 'persistence-timeout') {
                         if (err.code === 'failed-precondition') {
@@ -45,7 +43,6 @@ export class FirebaseAdapter extends StorageAdapter {
                 console.warn('[FB-ADAPTER] Firestore offline persistence setup error:', err);
             }
         }
-        console.log('[FB-ADAPTER] init() returning true');
         return true;
     }
 

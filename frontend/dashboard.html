@@ -16,294 +16,7 @@
         }
     </script>
     <script src="https://unpkg.com/lucide@latest"></script>
-<style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        [contenteditable]:empty:before { content: attr(placeholder); color: #9ca3af; pointer-events: none; }
-        [contenteditable] ul, [contenteditable] ol { margin-left: 1.25rem; margin: 0.5rem 0; }
-        [contenteditable] li { margin-bottom: 0.25rem; }
-        [contenteditable] strong { font-weight: 600; }
-        
-        @keyframes tabFadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .tab-enter { animation: tabFadeIn 0.25s ease-out; }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .spinner {
-            width: 18px; height: 18px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: currentColor;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-        }
-        .dark .spinner {
-            border-color: rgba(0,0,0,0.2);
-            border-top-color: currentColor;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; transform: scale(1); }
-            to { opacity: 0; transform: scale(0.97); }
-        }
-        .screen-enter { animation: fadeIn 0.4s ease-out; }
-        .screen-exit { animation: fadeOut 0.25s ease-in forwards; }
-        
-        .heatmap-cell, .calendar-cell { position: relative; }
-        .heatmap-cell:hover::after, .calendar-cell:hover::after {
-            content: attr(data-tooltip);
-            position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%);
-            background: #1e1e1e; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 10px;
-            z-index: 50;
-        }
-        .dark .heatmap-cell:hover::after, .dark .calendar-cell:hover::after {
-            background: #0a0a0a; color: #fff; border: 1px solid #333;
-        }
-
-        html.midnight { --midnight-bg: #161820; --midnight-bg-raised: #1c1f28; --midnight-bg-surface: #222633; --midnight-text: #cdd1dc; --midnight-text-mid: #a3a5b8; --midnight-text-dim: #6e7086; --midnight-border: #31354a; --midnight-border-subtle: #282b3d; --midnight-accent: #3a3550; --midnight-accent-glow: rgba(58,53,80,0.35); --midnight-font: 'SF Mono', 'Fira Code', 'Courier New', monospace; }
-        html.midnight body { background-color: var(--midnight-bg); color: var(--midnight-text); font-family: var(--midnight-font); }
-        html.midnight .bg-zinc-50 { background-color: var(--midnight-bg) !important; }
-        html.midnight .bg-white { background-color: var(--midnight-bg-raised) !important; }
-        html.midnight .bg-zinc-100 { background-color: var(--midnight-bg-surface) !important; }
-        html.midnight .bg-zinc-900 { background-color: var(--midnight-accent) !important; }
-        html.midnight .dark\:bg-zinc-900 { background-color: var(--midnight-bg-raised) !important; }
-        html.midnight .dark\:bg-zinc-800 { background-color: var(--midnight-bg-surface) !important; }
-        html.midnight .dark\:bg-zinc-700 { background-color: var(--midnight-bg-surface) !important; }
-        html.midnight .dark\:bg-zinc-100 { background-color: var(--midnight-accent) !important; }
-        html.midnight .dark\:bg-zinc-950 { background-color: var(--midnight-bg) !important; }
-        html.midnight .bg-zinc-50\/80 { background-color: rgba(17,19,24,0.85) !important; }
-        html.midnight .bg-white\/60 { background-color: rgba(24,26,30,0.65) !important; }
-        html.midnight .bg-zinc-50\/40 { background-color: rgba(17,19,24,0.45) !important; }
-        html.midnight .bg-zinc-50\/50 { background-color: rgba(17,19,24,0.5) !important; }
-        html.midnight .bg-zinc-200\/70 { background-color: rgba(42,38,51,0.35) !important; }
-        html.midnight .bg-zinc-800 { background-color: var(--midnight-bg-surface) !important; }
-        html.midnight .bg-zinc-800\/60 { background-color: rgba(28,31,36,0.55) !important; }
-        html.midnight .bg-zinc-950 { background-color: var(--midnight-bg) !important; }
-        html.midnight .bg-zinc-900\/80 { background-color: rgba(58,53,80,0.8) !important; }
-        html.midnight .bg-zinc-900\/40 { background-color: rgba(58,53,80,0.4) !important; }
-        html.midnight .bg-zinc-900\/60 { background-color: rgba(58,53,80,0.55) !important; }
-        html.midnight .bg-zinc-900\/10 { background-color: rgba(58,53,80,0.1) !important; }
-        html.midnight .text-zinc-900 { color: var(--midnight-text) !important; }
-        html.midnight .text-zinc-100 { color: var(--midnight-text) !important; }
-        html.midnight .text-zinc-800 { color: var(--midnight-text) !important; }
-        html.midnight .text-zinc-700 { color: var(--midnight-text-mid) !important; }
-        html.midnight .text-zinc-600 { color: var(--midnight-text-mid) !important; }
-        html.midnight .text-zinc-500 { color: var(--midnight-text-dim) !important; }
-        html.midnight .text-zinc-400 { color: var(--midnight-text-dim) !important; }
-        html.midnight .text-zinc-300 { color: var(--midnight-text-dim) !important; }
-        html.midnight .text-zinc-200 { color: var(--midnight-text-mid) !important; }
-        html.midnight .dark\:text-zinc-100 { color: var(--midnight-text) !important; }
-        html.midnight .dark\:text-zinc-300 { color: var(--midnight-text-dim) !important; }
-        html.midnight .dark\:text-zinc-400 { color: var(--midnight-text-dim) !important; }
-        html.midnight .dark\:text-zinc-500 { color: var(--midnight-text-dim) !important; }
-        html.midnight .dark\:text-zinc-700 { color: var(--midnight-text-mid) !important; }
-        html.midnight .dark\:text-zinc-200 { color: var(--midnight-text-mid) !important; }
-        html.midnight .text-white { color: var(--midnight-text) !important; }
-        html.midnight .text-white\/40 { color: rgba(184,181,192,0.45) !important; }
-        html.midnight .text-gray-900 { color: var(--midnight-text) !important; }
-        html.midnight .text-gray-500 { color: var(--midnight-text-dim) !important; }
-        html.midnight .text-gray-400 { color: var(--midnight-text-dim) !important; }
-        html.midnight .text-gray-700 { color: var(--midnight-text-mid) !important; }
-        html.midnight .text-gray-600 { color: var(--midnight-text-mid) !important; }
-        html.midnight .border-zinc-200 { border-color: var(--midnight-border) !important; }
-        html.midnight .border-zinc-100 { border-color: var(--midnight-border) !important; }
-        html.midnight .border-zinc-800 { border-color: var(--midnight-border) !important; }
-        html.midnight .border-zinc-300 { border-color: var(--midnight-border) !important; }
-        html.midnight .border-zinc-700 { border-color: var(--midnight-border) !important; }
-        html.midnight .border-zinc-600 { border-color: var(--midnight-border) !important; }
-        html.midnight .border-white\/70 { border-color: rgba(184,181,192,0.6) !important; }
-        html.midnight .border-white\/10 { border-color: rgba(184,181,192,0.18) !important; }
-        html.midnight .border-white\/5 { border-color: rgba(184,181,192,0.1) !important; }
-        html.midnight .border-white { border-color: var(--midnight-text-dim) !important; }
-        html.midnight .dark\:border-zinc-700 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-600 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-800 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-900 { border-color: var(--midnight-border) !important; }
-        html.midnight .bg-zinc-900\/80 { background-color: rgba(58,53,80,0.8) !important; }
-        html.midnight .bg-zinc-900\/40 { background-color: rgba(58,53,80,0.4) !important; }
-        html.midnight .bg-zinc-900\/60 { background-color: rgba(58,53,80,0.55) !important; }
-        html.midnight .bg-white\/10 { background-color: rgba(184,181,192,0.14) !important; }
-        html.midnight .bg-white\/5 { background-color: rgba(184,181,192,0.08) !important; }
-        html.midnight .divide-zinc-50 > div { border-color: var(--midnight-border) !important; }
-        html.midnight .divide-zinc-100 > div { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:divide-zinc-800 > div { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:divide-zinc-700 > div { border-color: var(--midnight-border) !important; }
-        html.midnight .hover\:bg-zinc-50:hover { background-color: var(--midnight-bg-surface) !important; }
-        html.midnight .hover\:bg-zinc-100:hover { background-color: var(--midnight-bg-surface) !important; }
-        html.midnight .hover\:bg-zinc-800:hover { background-color: var(--midnight-accent) !important; }
-        html.midnight .hover\:bg-white:hover { background-color: var(--midnight-bg-raised) !important; }
-        html.midnight .hover\:bg-zinc-50\/80:hover { background-color: rgba(28,31,36,0.7) !important; }
-        html.midnight .dark\:hover\:bg-zinc-700:hover { background-color: var(--midnight-bg-surface) !important; }
-        html.midnight .dark\:hover\:bg-zinc-800:hover { background-color: var(--midnight-bg-surface) !important; }
-        html.midnight .dark\:hover\:bg-zinc-800\/50:hover { background-color: rgba(28,31,36,0.5) !important; }
-        html.midnight .hover\:text-zinc-900:hover { color: var(--midnight-text) !important; }
-        html.midnight .hover\:text-zinc-700:hover { color: var(--midnight-text-mid) !important; }
-        html.midnight .hover\:text-zinc-600:hover { color: var(--midnight-text-mid) !important; }
-        html.midnight .hover\:text-zinc-900\/70:hover { color: rgba(184,181,192,0.7) !important; }
-        html.midnight .dark\:hover\:text-zinc-100:hover { color: var(--midnight-text) !important; }
-        html.midnight .dark\:hover\:text-zinc-300:hover { color: var(--midnight-text-dim) !important; }
-        html.midnight .dark\:hover\:text-zinc-200:hover { color: var(--midnight-text-mid) !important; }
-        html.midnight .bg-zinc-200 { background-color: var(--midnight-border) !important; }
-        html.midnight .dark\:bg-zinc-200 { background-color: var(--midnight-border) !important; }
-        html.midnight .bg-zinc-300 { background-color: var(--midnight-border) !important; }
-        html.midnight .bg-zinc-400 { background-color: var(--midnight-border) !important; }
-        html.midnight .bg-zinc-600 { background-color: var(--midnight-border) !important; }
-        html.midnight .bg-zinc-800\/40 { background-color: rgba(28,31,36,0.35) !important; }
-        html.midnight .dark\:bg-zinc-600 { background-color: var(--midnight-border) !important; }
-        html.midnight .dark\:bg-zinc-500 { background-color: var(--midnight-text-dim) !important; }
-        html.midnight .dark\:bg-zinc-400 { background-color: var(--midnight-text-dim) !important; }
-        html.midnight .dark\:bg-zinc-300 { background-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-500 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-400 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-600 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-500 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-400 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-600 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-500 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-400 { border-color: var(--midnight-border) !important; }
-        html.midnight .border-zinc-200\/50 { border-color: rgba(42,38,51,0.55) !important; }
-        html.midnight .border-zinc-200\/70 { border-color: rgba(42,38,51,0.65) !important; }
-        html.midnight .border-zinc-100\/40 { border-color: rgba(42,38,51,0.4) !important; }
-        html.midnight .border-zinc-700\/50 { border-color: rgba(42,38,51,0.55) !important; }
-        html.midnight .dark\:border-zinc-700\/50 { border-color: rgba(42,38,51,0.55) !important; }
-        html.midnight .dark\:border-zinc-600 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-700\/40 { border-color: rgba(42,38,51,0.4) !important; }
-        html.midnight .bg-zinc-100\/80 { background-color: rgba(28,31,36,0.75) !important; }
-        html.midnight .bg-zinc-50\/90 { background-color: rgba(17,19,24,0.9) !important; }
-        html.midnight .dark\:bg-zinc-900\/80 { background-color: rgba(58,53,80,0.75) !important; }
-        html.midnight .dark\:bg-zinc-900\/60 { background-color: rgba(58,53,80,0.55) !important; }
-        html.midnight .dark\:bg-zinc-800\/60 { background-color: rgba(28,31,36,0.55) !important; }
-        html.midnight .bg-zinc-50\/80 { background-color: rgba(17,19,24,0.8) !important; }
-        html.midnight .bg-zinc-50\/50 { background-color: rgba(17,19,24,0.5) !important; }
-        html.midnight .bg-zinc-50\/40 { background-color: rgba(17,19,24,0.4) !important; }
-        html.midnight .bg-white\/80 { background-color: rgba(24,26,30,0.8) !important; }
-        html.midnight .selection\:bg-zinc-200::selection { background-color: var(--midnight-border) !important; }
-        html.midnight .dark\:selection\:bg-zinc-700::selection { background-color: var(--midnight-border) !important; }
-        html.midnight .dark\:text-zinc-900 { color: var(--midnight-text) !important; }
-        html.midnight .text-red-500 { color: #7a3a3a !important; }
-        html.midnight .dark\:text-red-400 { color: #7a3a3a !important; }
-        html.midnight .text-rose-500 { background-color: #7a3a3a !important; }
-        html.midnight .dark\:text-red-500 { color: #7a3a3a !important; }
-        html.midnight .bg-rose-500 { background-color: #7a3a3a !important; }
-        html.midnight .bg-zinc-900 { background-color: var(--midnight-accent) !important; }
-        html.midnight .hover\:bg-zinc-800:hover { background-color: var(--midnight-accent) !important; }
-        html.midnight .dark\:bg-zinc-100 { background-color: var(--midnight-accent) !important; }
-        html.midnight .dark\:hover\:bg-zinc-200:hover { background-color: var(--midnight-accent) !important; }
-        html.midnight .bg-zinc-900\/80 { background-color: rgba(58,53,80,0.8) !important; }
-        html.midnight .bg-zinc-900\/40 { background-color: rgba(58,53,80,0.4) !important; }
-        html.midnight .bg-zinc-900\/60 { background-color: rgba(58,53,80,0.55) !important; }
-        html.midnight .bg-zinc-900\/10 { background-color: rgba(58,53,80,0.1) !important; }
-        html.midnight .text-zinc-900\/80 { color: rgba(184,181,192,0.8) !important; }
-        html.midnight input, html.midnight select, html.midnight [contenteditable] { background-color: var(--midnight-bg-raised) !important; border-color: var(--midnight-border) !important; color: var(--midnight-text) !important; font-family: var(--midnight-font) !important; }
-        html.midnight .nav-btn.text-gray-500 { color: var(--midnight-text-dim) !important; }
-        html.midnight .nav-btn.hover\:text-gray-300:hover { color: var(--midnight-text-mid) !important; }
-        html.midnight .nav-btn.hover\:bg-white\/5:hover { background-color: rgba(184,181,192,0.1) !important; }
-        html.midnight .nav-btn.text-white { color: var(--midnight-text) !important; }
-        html.midnight .nav-btn.bg-white\/10 { background-color: rgba(184,181,192,0.14) !important; }
-        html.midnight .bg-\[\#1e1e1e\] { background-color: var(--midnight-bg-raised) !important; }
-        html.midnight .dark\:border-zinc-700 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-600 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-800 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-900 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:text-zinc-400 { color: var(--midnight-text-dim) !important; }
-        html.midnight .dark\:text-zinc-500 { color: var(--midnight-text-dim) !important; }
-        html.midnight .dark\:text-zinc-300 { color: var(--midnight-text-dim) !important; }
-        html.midnight .dark\:text-zinc-200 { color: var(--midnight-text-mid) !important; }
-        html.midnight .dark\:text-zinc-100 { color: var(--midnight-text) !important; }
-        html.midnight .dark\:text-zinc-900 { color: var(--midnight-text) !important; }
-        html.midnight .dark\:text-zinc-700 { color: var(--midnight-text-mid) !important; }
-        html.midnight .dark\:text-zinc-600 { color: var(--midnight-text-mid) !important; }
-        html.midnight .dark\:text-zinc-800 { color: var(--midnight-text) !important; }
-        html.midnight .dark\:hover\:text-zinc-100:hover { color: var(--midnight-text) !important; }
-        html.midnight .dark\:hover\:text-zinc-300:hover { color: var(--midnight-text-dim) !important; }
-        html.midnight .dark\:hover\:text-zinc-200:hover { color: var(--midnight-text-mid) !important; }
-        html.midnight .dark\:bg-zinc-900 { background-color: var(--midnight-bg-raised) !important; }
-        html.midnight .dark\:bg-zinc-800 { background-color: var(--midnight-bg-surface) !important; }
-        html.midnight .dark\:bg-zinc-700 { background-color: var(--midnight-bg-surface) !important; }
-        html.midnight .dark\:bg-zinc-100 { background-color: var(--midnight-accent) !important; }
-        html.midnight .dark\:bg-zinc-50 { background-color: var(--midnight-bg) !important; }
-        html.midnight .dark\:bg-zinc-950 { background-color: var(--midnight-bg) !important; }
-        html.midnight .dark\:bg-zinc-800\/40 { background-color: rgba(28,31,36,0.45) !important; }
-        html.midnight .dark\:bg-zinc-800\/50 { background-color: rgba(28,31,36,0.5) !important; }
-        html.midnight .dark\:bg-zinc-700\/40 { background-color: rgba(28,31,36,0.45) !important; }
-        html.midnight .dark\:bg-zinc-700\/55 { background-color: rgba(28,31,36,0.55) !important; }
-        html.midnight .dark\:bg-zinc-800\/60 { background-color: rgba(28,31,36,0.55) !important; }
-        html.midnight .dark\:bg-zinc-900\/80 { background-color: rgba(58,53,80,0.75) !important; }
-        html.midnight .dark\:bg-zinc-900\/60 { background-color: rgba(58,53,80,0.55) !important; }
-        html.midnight .dark\:hover\:bg-zinc-700:hover { background-color: var(--midnight-bg-surface) !important; }
-        html.midnight .dark\:hover\:bg-zinc-800:hover { background-color: var(--midnight-bg-surface) !important; }
-        html.midnight .dark\:hover\:bg-zinc-800\/50:hover { background-color: rgba(28,31,36,0.5) !important; }
-        html.midnight .dark\:hover\:bg-zinc-100:hover { background-color: var(--midnight-accent) !important; }
-        html.midnight .dark\:hover\:bg-zinc-200:hover { background-color: var(--midnight-accent) !important; }
-        html.midnight .dark\:border-zinc-700 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-600 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-800 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-900 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-500 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-400 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-600 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-500 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:border-zinc-400 { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:divide-zinc-800 > div { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:divide-zinc-700 > div { border-color: var(--midnight-border) !important; }
-        html.midnight .dark\:text-zinc-400 { color: var(--midnight-text-dim) !important; }
-        html.midnight .dark\:text-zinc-500 { color: var(--midnight-text-dim) !important; }
-        html.midnight .dark\:text-zinc-300 { color: var(--midnight-text-dim) !important; }
-        html.midnight .dark\:text-zinc-200 { color: var(--midnight-text-mid) !important; }
-        html.midnight .dark\:text-zinc-100 { color: var(--midnight-text) !important; }
-        html.midnight .dark\:text-zinc-900 { color: var(--midnight-text) !important; }
-        html.midnight .dark\:text-zinc-700 { color: var(--midnight-text-mid) !important; }
-        html.midnight .dark\:text-zinc-600 { color: var(--midnight-text-mid) !important; }
-        html.midnight .dark\:text-zinc-800 { color: var(--midnight-text) !important; }
-        html.midnight .dark\:hover\:text-zinc-100:hover { color: var(--midnight-text) !important; }
-        html.midnight .dark\:hover\:text-zinc-300:hover { color: var(--midnight-text-dim) !important; }
-        html.midnight .dark\:hover\:text-zinc-200:hover { color: var(--midnight-text-mid) !important; }
-        html.midnight .hover\:bg-zinc-50\/80:hover { background-color: rgba(28,31,36,0.7) !important; }
-        html.midnight .bg-zinc-50\/90 { background-color: rgba(17,19,24,0.9) !important; }
-        html.midnight .dark\:bg-zinc-900\/80 { background-color: rgba(58,53,80,0.75) !important; }
-        html.midnight .dark\:bg-zinc-900\/60 { background-color: rgba(58,53,80,0.55) !important; }
-        html.midnight .dark\:bg-zinc-800\/60 { background-color: rgba(28,31,36,0.55) !important; }
-        html.midnight .bg-zinc-50\/80 { background-color: rgba(17,19,24,0.8) !important; }
-        html.midnight .bg-zinc-50\/50 { background-color: rgba(17,19,24,0.5) !important; }
-        html.midnight .bg-zinc-50\/40 { background-color: rgba(17,19,24,0.4) !important; }
-        html.midnight .bg-white\/80 { background-color: rgba(24,26,30,0.8) !important; }
-        html.midnight .selection\:bg-zinc-200::selection { background-color: var(--midnight-border) !important; }
-        html.midnight .dark\:selection\:bg-zinc-700::selection { background-color: var(--midnight-border) !important; }
-        html.midnight .dark\:text-zinc-900 { color: var(--midnight-text) !important; }
-        html.midnight .text-red-500 { color: #7a3a3a !important; }
-        html.midnight .dark\:text-red-400 { color: #7a3a3a !important; }
-        html.midnight .text-rose-500 { background-color: #7a3a3a !important; }
-        html.midnight .dark\:text-red-500 { color: #7a3a3a !important; }
-        html.midnight .bg-rose-500 { background-color: #7a3a3a !important; }
-        html.midnight .bg-zinc-900 { background-color: var(--midnight-accent) !important; }
-        html.midnight .hover\:bg-zinc-800:hover { background-color: var(--midnight-accent) !important; }
-        html.midnight .dark\:bg-zinc-100 { background-color: var(--midnight-accent) !important; }
-        html.midnight .dark\:hover\:bg-zinc-200:hover { background-color: var(--midnight-accent) !important; }
-        html.midnight input, html.midnight select, html.midnight [contenteditable] { background-color: var(--midnight-bg-raised) !important; border-color: var(--midnight-border) !important; color: var(--midnight-text) !important; font-family: var(--midnight-font) !important; }
-        html.midnight .nav-btn.text-gray-500 { color: var(--midnight-text-dim) !important; }
-        html.midnight .nav-btn.hover\:text-gray-300:hover { color: var(--midnight-text-mid) !important; }
-        html.midnight .nav-btn.hover\:bg-white\/5:hover { background-color: rgba(184,181,192,0.1) !important; }
-        html.midnight .nav-btn.text-white { color: var(--midnight-text) !important; }
-        html.midnight .nav-btn.bg-white\/10 { background-color: rgba(184,181,192,0.14) !important; }
-        html.midnight .bg-\[\#1e1e1e\] { background-color: var(--midnight-bg-raised) !important; }
-        html.midnight .tick-motif::before { content: ''; display: inline-block; width: 1px; background: var(--midnight-accent); margin-right: 8px; vertical-align: middle; opacity: 0.6; }
-        html.midnight .tick-motif-sm::before { content: ''; display: inline-block; width: 1px; height: 0.6em; background: var(--midnight-accent); margin-right: 6px; vertical-align: middle; opacity: 0.5; }
-        html.midnight .tick-motif-lg::before { content: ''; display: inline-block; width: 1px; height: 1.2em; background: var(--midnight-accent); margin-right: 10px; vertical-align: middle; opacity: 0.4; }
-        html.midnight h1, html.midnight h2, html.midnight h3, html.midnight h4, html.midnight h5, html.midnight h6 { font-family: var(--midnight-font) !important; letter-spacing: -0.02em; }
-        html.midnight .font-sans { font-family: var(--midnight-font) !important; }
-        html.midnight .animate-none { animation: none !important; }
-        html.midnight .tab-enter { animation: tabFadeIn 0.4s ease-out; }
-    </style>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="bg-zinc-50 text-zinc-900 font-sans min-h-screen selection:bg-zinc-200 dark:selection:bg-zinc-700 dark:bg-[#0a0a0a] dark:text-zinc-100 midnight:bg-[#111318] midnight:text-[#b8b5c0] midnight:selection:bg-[#2a2633]">
 
@@ -407,17 +120,17 @@
                     <i data-lucide="layers" class="w-5 h-5 text-gray-900"></i>
                 </div>
                 
-                <nav class="flex flex-col gap-6 w-full px-3">
-                    <button onclick="switchTab('dashboard')" id="btn-dashboard" class="nav-btn w-full h-12 rounded-xl flex items-center justify-center transition-all bg-white/10 text-white" title="Tracker & Timer">
+                <nav class="flex flex-col gap-6 w-full px-3" role="tablist" aria-label="Main navigation">
+                    <button onclick="switchTab('dashboard')" id="btn-dashboard" class="nav-btn w-full h-12 rounded-xl flex items-center justify-center transition-all bg-white/10 text-white" title="Tracker & Timer" role="tab" aria-selected="true" aria-controls="tab-dashboard">
                         <i data-lucide="layout-grid" class="w-5 h-5"></i>
                     </button>
-<button onclick="switchTab('seasons')" id="btn-seasons" class="nav-btn w-full h-12 rounded-xl flex items-center justify-center transition-all text-gray-500 hover:bg-white/5 hover:text-gray-300" title="Seasons Planner">
+<button onclick="switchTab('seasons')" id="btn-seasons" class="nav-btn w-full h-12 rounded-xl flex items-center justify-center transition-all text-gray-500 hover:bg-white/5 hover:text-gray-300" title="Seasons Planner" role="tab" aria-selected="false" aria-controls="tab-seasons">
                         <i data-lucide="sprout" class="w-5 h-5"></i>
                     </button>
-                    <button onclick="switchTab('calendar')" id="btn-calendar" class="nav-btn w-full h-12 rounded-xl flex items-center justify-center transition-all text-gray-500 hover:bg-white/5 hover:text-gray-300" title="Activity Calendar">
+                    <button onclick="switchTab('calendar')" id="btn-calendar" class="nav-btn w-full h-12 rounded-xl flex items-center justify-center transition-all text-gray-500 hover:bg-white/5 hover:text-gray-300" title="Activity Calendar" role="tab" aria-selected="false" aria-controls="tab-calendar">
                         <i data-lucide="calendar" class="w-5 h-5"></i>
                     </button>
-                    <button onclick="switchTab('notes')" id="btn-notes" class="nav-btn w-full h-12 rounded-xl flex items-center justify-center transition-all text-gray-500 hover:bg-white/5 hover:text-gray-300" title="Notes Section">
+                    <button onclick="switchTab('notes')" id="btn-notes" class="nav-btn w-full h-12 rounded-xl flex items-center justify-center transition-all text-gray-500 hover:bg-white/5 hover:text-gray-300" title="Notes Section" role="tab" aria-selected="false" aria-controls="tab-notes">
                         <i data-lucide="book-open" class="w-5 h-5"></i>
                     </button>
                 </nav>
@@ -448,7 +161,7 @@
                         <i data-lucide="settings" class="w-4 h-4"></i>
                     </button>
 
-                    <button onclick="toggleTheme()" id="themeToggle" class="p-2.5 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-xl text-gray-600 dark:text-zinc-300 transition relative" title="Cycle theme">
+                    <button onclick="toggleTheme()" id="themeToggle" class="p-2.5 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-xl text-gray-600 dark:text-zinc-300 transition relative" title="Cycle theme" aria-label="Toggle theme">
                         <i data-lucide="sun" class="w-4 h-4 dark-icon hidden"></i>
                         <i data-lucide="music" class="w-4 h-4 midnight-icon hidden"></i>
                         <i data-lucide="moon" class="w-4 h-4 light-icon"></i>
@@ -485,7 +198,7 @@
                         </div>
 
                         <div class="my-auto py-2 z-10 flex items-baseline gap-3">
-                            <div id="timerDisplay" class="text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-mono">00:00:00</div>
+                            <div id="timerDisplay" class="text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-mono" aria-live="polite" aria-atomic="true">00:00:00</div>
                             <span class="text-xs bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-mono px-2 py-0.5 rounded-full font-medium" id="streakBadge">Session Counter</span>
                         </div>
                         
@@ -762,7 +475,11 @@
         import { checkBreakReminder, resetTimerNotificationState } from './js/modules/notifications.js';
         import { calculateSeasonRetrospective, renderRetrospectiveModal } from './js/modules/retrospective.js';
         import { startOnboardingTour } from './js/modules/onboarding.js';
-        import { isTauriEnv } from './js/modules/export.js';
+        import { isTauriEnv } from './js/utils/tauri.js';
+        import { escapeHtml } from './js/utils/sanitize.js';
+        import { formatTimeHMS, formatHoursAndMins, formatDateRange } from './js/utils/format.js';
+        import { showToast, switchTab, playSound } from './js/utils/ui.js';
+        import { toggleTheme, applySavedTheme } from './js/utils/theme.js';
 
         const GOOGLE_USE_REDIRECT = typeof window !== "undefined" && !!window.__TAURI_INTERNALS__;
         const firebaseConfig = window.__FIREBASE_CONFIG__ || {};
@@ -848,16 +565,7 @@
             audio.play().catch(() => {});
         }
 
-        window.showToast = function(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-xl border text-xs font-bold transition-all transform translate-y-0 opacity-100 flex items-center gap-2 ${type === 'warning' ? 'bg-amber-900 text-amber-100 border-amber-700' : 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border-zinc-700'}`;
-            toast.innerHTML = `<span>${message}</span>`;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
+        window.showToast = showToast;
 
         let coreGlobalLoop = null;
 
@@ -945,7 +653,7 @@
                 });
 
             const isLocal = window.state.storageMode === 'local';
-            userDisplay.innerHTML = `<span class="text-xs font-semibold">${user.displayName || user.email} ${isLocal ? '(Local)' : ''}</span> <button onclick="logout()" class="ml-2 text-red-400 dark:text-red-500 hover:text-red-300 text-xs underline">Exit</button>`;
+            userDisplay.innerHTML = `<span class="text-xs font-semibold">${escapeHtml(user.displayName || user.email)} ${isLocal ? '(Local)' : ''}</span> <button onclick="logout()" class="ml-2 text-red-400 dark:text-red-500 hover:text-red-300 text-xs underline">Exit</button>`;
 
             console.log('[BOOT] creating storage adapter...');
             // Initialize StorageAdapter
@@ -970,11 +678,15 @@
             // hammer the DOM during the initial boot sync.
             const renderTimers = {};
             function scheduleRender(key, fn, delay = 80) {
-                if (renderTimers[key]) clearTimeout(renderTimers[key]);
-                renderTimers[key] = setTimeout(() => {
-                    renderTimers[key] = null;
-                    fn();
-                }, delay);
+                if (renderTimers[key]) {
+                    cancelAnimationFrame(renderTimers[key]);
+                }
+                renderTimers[key] = requestAnimationFrame(() => {
+                    renderTimers[key] = setTimeout(() => {
+                        renderTimers[key] = null;
+                        fn();
+                    }, delay);
+                });
             }
 
             // 1. Subscribe to Items
@@ -1075,7 +787,7 @@
             console.log('[BOOT] activeTimer subscribed');
 
             if (coreGlobalLoop) clearInterval(coreGlobalLoop);
-            coreGlobalLoop = setInterval(processingEngineCycle, 200);
+            coreGlobalLoop = setInterval(processingEngineCycle, 1000);
             console.log('[BOOT] coreGlobalLoop started, interval:', coreGlobalLoop);
 
             // Show main app immediately — don't block on animation.
@@ -2100,7 +1812,7 @@
                             </div>
                             <div>
                                 <div class="flex items-center gap-2">
-                                    <h4 class="text-base font-bold text-zinc-900 dark:text-zinc-100">${season.title}</h4>
+                                    <h4 class="text-base font-bold text-zinc-900 dark:text-zinc-100">${escapeHtml(season.title)}</h4>
                                     ${statusBadge}
                                 </div>
                                 <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1">${formatDateRange(season.startDate, season.endDate)} • ${season.durationWeeks} weeks</p>
@@ -2176,7 +1888,7 @@
                 container.innerHTML = unpromoted.map(item => {
                     return `
                         <div class="flex items-center justify-between bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-3">
-                            <span class="text-sm text-zinc-700 dark:text-zinc-300 font-medium flex-1">${item.title}</span>
+                            <span class="text-sm text-zinc-700 dark:text-zinc-300 font-medium flex-1">${escapeHtml(item.title)}</span>
                             <div class="flex items-center gap-1 ml-2">
                                 <button onclick="promoteBacklogToSeason('${item.id}', 'dev')" class="px-2 py-1 bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-[10px] font-bold rounded-md hover:bg-zinc-300 dark:hover:bg-zinc-600 transition">Dev</button>
                                 <button onclick="promoteBacklogToSeason('${item.id}', 'personal')" class="px-2 py-1 bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-[10px] font-bold rounded-md hover:bg-zinc-300 dark:hover:bg-zinc-600 transition">Personal</button>
@@ -2194,11 +1906,11 @@
                 const devSelect = document.getElementById('devBacklogSelect');
                 const personalSelect = document.getElementById('personalBacklogSelect');
                 if (devSelect) {
-                    devSelect.innerHTML = '<option value="">Load from backlog</option>' + unpromoted.map(b => `<option value="${b.id}">${b.title}</option>`).join('');
+                    devSelect.innerHTML = '<option value="">Load from backlog</option>' + unpromoted.map(b => `<option value="${escapeHtml(b.id)}">${escapeHtml(b.title)}</option>`).join('');
                     devSelect.onchange = (e) => { if (e.target.value) promoteBacklogToSeason(e.target.value, 'dev'); };
                 }
                 if (personalSelect) {
-                    personalSelect.innerHTML = '<option value="">Load from backlog</option>' + unpromoted.map(b => `<option value="${b.id}">${b.title}</option>`).join('');
+                    personalSelect.innerHTML = '<option value="">Load from backlog</option>' + unpromoted.map(b => `<option value="${escapeHtml(b.id)}">${escapeHtml(b.title)}</option>`).join('');
                     personalSelect.onchange = (e) => { if (e.target.value) promoteBacklogToSeason(e.target.value, 'personal'); };
                 }
             }
@@ -2224,7 +1936,7 @@
                             <div class="flex items-center gap-3">
                                 <span class="text-xs font-mono text-zinc-500 dark:text-zinc-400">${new Date(log.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                                 <span class="text-xs font-bold ${isProduction ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900' : 'bg-zinc-200 dark:bg-zinc-600 text-zinc-700 dark:text-zinc-200'} px-2 py-0.5 rounded-full">${isProduction ? 'Production' : 'Consumption'}</span>
-                                <span class="text-sm text-zinc-700 dark:text-zinc-300 font-medium">${log.task}</span>
+                                <span class="text-sm text-zinc-700 dark:text-zinc-300 font-medium">${escapeHtml(log.task)}</span>
                             </div>
                             <button onclick="deleteDailyLog('${log.id}', event)" class="p-1 hover:bg-zinc-200 dark:hover:bg-zinc-600 rounded text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition">
                                 <i data-lucide="x" class="w-3.5 h-3.5"></i>
@@ -2247,19 +1959,9 @@
     </script>
 
     <script>
-        function formatTimeHMS(totalSeconds) {
-            const hrs = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
-            const mins = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
-            const secs = (totalSeconds % 60).toString().padStart(2, '0');
-            return `${hrs}:${mins}:${secs}`;
-        }
-
-        function formatHoursAndMins(totalSeconds) {
-            const hrs = Math.floor(totalSeconds / 3600);
-            const mins = Math.floor((totalSeconds % 3600) / 60);
-            if(hrs === 0) return `${mins}m`;
-            return `${hrs}h ${mins}m`;
-        }
+        window.formatTimeHMS = formatTimeHMS;
+        window.formatHoursAndMins = formatHoursAndMins;
+        window.formatDateRange = formatDateRange;
 
         function switchTab(tabId) {
             playSound('nav tap');
@@ -2275,11 +1977,13 @@
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('bg-white/10', 'text-white');
                 btn.classList.add('text-gray-500', 'hover:bg-white/5', 'hover:text-gray-300');
+                btn.setAttribute('aria-selected', 'false');
             });
             const activeBtn = document.getElementById(`btn-${tabId}`);
             if(activeBtn) {
                 activeBtn.classList.add('bg-white/10', 'text-white');
                 activeBtn.classList.remove('text-gray-500', 'hover:bg-white/5', 'hover:text-gray-300');
+                activeBtn.setAttribute('aria-selected', 'true');
             }
             if(tabId === 'calendar') {
                 renderCalendarViews();
@@ -2288,44 +1992,12 @@
                 renderSeasonsView();
             }
         }
+        window.switchTab = switchTab;
 
-        function toggleTheme() {
-            const html = document.documentElement;
-            const current = localStorage.getItem('theme') || 'light';
-            const next = current === 'light' ? 'midnight' : current === 'midnight' ? 'dark' : 'light';
-            applyTheme(next);
-        }
-
-        function updateThemeIcon(theme) {
-            const darkIcon = document.querySelector('.dark-icon');
-            const lightIcon = document.querySelector('.light-icon');
-            const midnightIcon = document.querySelector('.midnight-icon');
-            if (!darkIcon || !lightIcon || !midnightIcon) return;
-
-            darkIcon.classList.toggle('hidden', theme !== 'dark');
-            lightIcon.classList.toggle('hidden', theme === 'midnight' || theme === 'dark');
-            midnightIcon.classList.toggle('hidden', theme !== 'midnight');
-        }
-
-        function applyTheme(theme) {
-            const html = document.documentElement;
-            html.classList.remove('dark', 'midnight');
-            if (theme === 'dark') html.classList.add('dark');
-            if (theme === 'midnight') html.classList.add('midnight');
-            localStorage.setItem('theme', theme);
-            updateThemeIcon(theme);
-        }
-
-        function applySavedTheme() {
-            const saved = localStorage.getItem('theme');
-            if (saved) {
-                applyTheme(saved);
-            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                applyTheme('dark');
-            } else {
-                applyTheme('light');
-            }
-        }
+        window.toggleTheme = toggleTheme;
+        window.applyTheme = applyTheme;
+        window.updateThemeIcon = updateThemeIcon;
+        window.applySavedTheme = applySavedTheme;
 
         function showTab(tabId) {
             document.getElementById('loginTab').classList.toggle('hidden', tabId !== 'loginTab');
@@ -2456,7 +2128,7 @@
                     <div class="col-span-5 flex items-center gap-3">
                         <div class="w-2 h-2 rounded-full ${item.type === 'topic' ? 'bg-zinc-400 dark:bg-zinc-500' : 'bg-zinc-700 dark:bg-zinc-300'}"></div>
                         <div>
-                            <div class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">${item.name}</div>
+                            <div class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">${escapeHtml(item.name)}</div>
                             <div class="text-[10px] text-zinc-400 dark:text-zinc-500 capitalize">${item.type}</div>
                         </div>
                     </div>
@@ -2747,8 +2419,8 @@
 
                 card.innerHTML = `
                     <div class="pr-6">
-                        <h4 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">${note.title || 'Untitled Concept'}</h4>
-                        <p class="text-xs text-zinc-400 dark:text-zinc-500 line-clamp-2 mt-1 font-normal">${note.body ? note.body.replace(/<[^>]*>/g, '') : 'Empty note content...'}</p>
+                        <h4 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">${escapeHtml(note.title) || 'Untitled Concept'}</h4>
+                        <p class="text-xs text-zinc-400 dark:text-zinc-500 line-clamp-2 mt-1 font-normal">${note.body ? escapeHtml(note.body.replace(/<[^>]*>/g, '')) : 'Empty note content...'}</p>
                     </div>
                     <button onclick="deleteNote('${note.id}', event)" class="absolute top-4 right-4 p-1 hover:bg-zinc-200/60 dark:hover:bg-zinc-700 text-zinc-300 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 rounded transition">
                         <i data-lucide="x" class="w-3.5 h-3.5"></i>

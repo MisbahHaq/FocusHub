@@ -12,42 +12,7 @@
         }
     </script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; color: #1a1a1a; }
-        html.midnight { --midnight-bg: #111318; --midnight-bg-raised: #181a1e; --midnight-bg-surface: #1c1f24; --midnight-text: #b8b5c0; --midnight-text-mid: #8a8694; --midnight-text-dim: #5c5866; --midnight-border: #2a2633; --midnight-border-subtle: #22202a; --midnight-accent: #3a3550; --midnight-accent-glow: rgba(58,53,80,0.25); --midnight-font: 'SF Mono', 'Fira Code', 'Courier New', monospace; }
-        html.midnight body { background-color: var(--midnight-bg); color: var(--midnight-text); font-family: var(--midnight-font); }
-        html.midnight .bg-zinc-50 { background-color: var(--midnight-bg) !important; }
-        html.midnight .bg-white { background-color: var(--midnight-bg-raised) !important; }
-        html.midnight .bg-zinc-100 { background-color: var(--midnight-bg-surface) !important; }
-        html.midnight .bg-zinc-900 { background-color: var(--midnight-accent) !important; }
-        html.midnight .dark\:bg-zinc-900 { background-color: var(--midnight-bg-raised) !important; }
-        html.midnight .dark\:bg-zinc-800 { background-color: var(--midnight-bg-surface) !important; }
-        html.midnight .dark\:bg-zinc-700 { background-color: var(--midnight-bg-surface) !important; }
-        html.midnight .dark\:bg-zinc-100 { background-color: var(--midnight-accent) !important; }
-        html.midnight .dark\:bg-zinc-950 { background-color: var(--midnight-bg) !important; }
-        html.midnight .text-zinc-900 { color: var(--midnight-text) !important; }
-        html.midnight .text-zinc-500 { color: var(--midnight-text-dim) !important; }
-        html.midnight .text-zinc-400 { color: var(--midnight-text-dim) !important; }
-        html.midnight .text-zinc-700 { color: var(--midnight-text-mid) !important; }
-        html.midnight .text-zinc-600 { color: var(--midnight-text-mid) !important; }
-        html.midnight .border-zinc-200 { border-color: var(--midnight-border) !important; }
-        html.midnight .border-zinc-100 { border-color: var(--midnight-border) !important; }
-        html.midnight .bg-zinc-200 { background-color: var(--midnight-border) !important; }
-        html.midnight .hover\:bg-zinc-50:hover { background-color: var(--midnight-bg-surface) !important; }
-        html.midnight .hover\:bg-zinc-800:hover { background-color: var(--midnight-accent) !important; }
-        html.midnight .hover\:bg-zinc-100:hover { background-color: var(--midnight-bg-surface) !important; }
-        html.midnight .hover\:text-zinc-900:hover { color: var(--midnight-text) !important; }
-        html.midnight .hover\:text-zinc-600:hover { color: var(--midnight-text-mid) !important; }
-        html.midnight .text-red-500 { color: #7a3a3a !important; }
-        html.midnight .bg-rose-500 { background-color: #7a3a3a !important; }
-        html.midnight input, html.midnight select { background-color: var(--midnight-bg-raised) !important; border-color: var(--midnight-border) !important; color: var(--midnight-text) !important; font-family: var(--midnight-font) !important; }
-        html.midnight .tick-motif::before { content: ''; display: inline-block; width: 1px; background: var(--midnight-accent); margin-right: 8px; vertical-align: middle; opacity: 0.6; }
-        html.midnight .tick-motif-sm::before { content: ''; display: inline-block; width: 1px; height: 0.6em; background: var(--midnight-accent); margin-right: 6px; vertical-align: middle; opacity: 0.5; }
-        html.midnight .tick-motif-lg::before { content: ''; display: inline-block; width: 1px; height: 1.2em; background: var(--midnight-accent); margin-right: 10px; vertical-align: middle; opacity: 0.4; }
-        html.midnight h1, html.midnight h2, html.midnight h3, html.midnight h4, html.midnight h5, html.midnight h6 { font-family: var(--midnight-font) !important; letter-spacing: -0.02em; }
-        html.midnight .font-sans { font-family: var(--midnight-font) !important; }
-    </style>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="bg-zinc-50 dark:bg-[#0a0a0a] antialiased selection:bg-zinc-200 dark:selection:bg-zinc-700 midnight:bg-[#111318] midnight:text-[#b8b5c0] midnight:selection:bg-[#2a2633]">
 
@@ -119,47 +84,11 @@
         </div>
     </footer>
 
-    <script>
+    <script type="module">
+        import { toggleTheme, applySavedTheme } from './js/utils/theme.js';
+
         lucide.createIcons();
-
-        function toggleTheme() {
-            const html = document.documentElement;
-            const current = localStorage.getItem('theme') || 'light';
-            const next = current === 'light' ? 'midnight' : current === 'midnight' ? 'dark' : 'light';
-            applyTheme(next);
-        }
-
-        function updateThemeIcon(theme) {
-            const darkIcon = document.querySelector('#themeToggle .dark-icon');
-            const lightIcon = document.querySelector('#themeToggle .light-icon');
-            const midnightIcon = document.querySelector('#themeToggle .midnight-icon');
-            if (!darkIcon || !lightIcon || !midnightIcon) return;
-
-            darkIcon.classList.toggle('hidden', theme !== 'dark');
-            lightIcon.classList.toggle('hidden', theme === 'midnight' || theme === 'dark');
-            midnightIcon.classList.toggle('hidden', theme !== 'midnight');
-        }
-
-        function applyTheme(theme) {
-            const html = document.documentElement;
-            html.classList.remove('dark', 'midnight');
-            if (theme === 'dark') html.classList.add('dark');
-            if (theme === 'midnight') html.classList.add('midnight');
-            localStorage.setItem('theme', theme);
-            updateThemeIcon(theme);
-        }
-
-        function applySavedTheme() {
-            const saved = localStorage.getItem('theme');
-            if (saved) {
-                applyTheme(saved);
-            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                applyTheme('dark');
-            } else {
-                applyTheme('light');
-            }
-        }
-
+        window.toggleTheme = toggleTheme;
         applySavedTheme();
     </script>
 </body>
