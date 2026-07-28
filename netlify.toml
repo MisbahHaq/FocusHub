@@ -1,6 +1,6 @@
 [build]
   base    = "frontend"
-  command = "node ../scripts/build-frontend.js"
+  command = "node ../scripts/build-frontend.cjs"
   publish = "."
 
 [build.environment]

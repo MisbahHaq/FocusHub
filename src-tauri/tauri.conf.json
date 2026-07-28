@@ -6,8 +6,8 @@
   "build": {
     "frontendDist": "../frontend",
     "devUrl": "http://localhost:5173",
-    "beforeDevCommand": "node scripts/static-server.js",
-    "beforeBuildCommand": "node scripts/build-frontend.js"
+    "beforeDevCommand": "node ../scripts/static-server.cjs",
+    "beforeBuildCommand": "node ../scripts/build-frontend.cjs"
   },
   "app": {
     "windows": [
