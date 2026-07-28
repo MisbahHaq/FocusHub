@@ -645,13 +645,7 @@
         async function bootWorkspaceForUser(user, animate = false) {
             try {
                 window.state.user = user;
-                const loginScreen = document.getElementById('loginScreen');
-                const mainApp = document.getElementById('mainApp');
                 const userDisplay = document.getElementById('userDisplay');
-                    loginScreen: !!loginScreen, 
-                    mainApp: !!mainApp, 
-                    userDisplay: !!userDisplay 
-                });
 
             const isLocal = window.state.storageMode === 'local';
             userDisplay.innerHTML = `<span class="text-xs font-semibold">${escapeHtml(user.displayName || user.email)} ${isLocal ? '(Local)' : ''}</span> <button onclick="logout()" class="ml-2 text-red-400 dark:text-red-500 hover:text-red-300 text-xs underline">Exit</button>`;
@@ -1945,12 +1939,13 @@
         }
 
         window.renderSeasonsView = renderSeasonsView;
-    </script>
-
-    <script>
         window.formatTimeHMS = formatTimeHMS;
         window.formatHoursAndMins = formatHoursAndMins;
         window.formatDateRange = formatDateRange;
+        window.toggleTheme = toggleTheme;
+        window.applyTheme = applyTheme;
+        window.updateThemeIcon = updateThemeIcon;
+        window.applySavedTheme = applySavedTheme;
 
         function switchTab(tabId) {
             playSound('nav tap');
@@ -1982,11 +1977,6 @@
             }
         }
         window.switchTab = switchTab;
-
-        window.toggleTheme = toggleTheme;
-        window.applyTheme = applyTheme;
-        window.updateThemeIcon = updateThemeIcon;
-        window.applySavedTheme = applySavedTheme;
 
         function showTab(tabId) {
             document.getElementById('loginTab').classList.toggle('hidden', tabId !== 'loginTab');
