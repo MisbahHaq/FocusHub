@@ -833,12 +833,6 @@
                 onAuthStateChanged(auth, async (user) => {
                     const currentMode = window.state.storageMode || getStorageMode();
                     window.state.storageMode = currentMode;
-                        hasUser: !!user, 
-                        uid: user?.uid, 
-                        email: user?.email,
-                        storageMode: window.state.storageMode,
-                        currentMode
-                    });
                     if (user && currentMode === 'cloud') {
                         if (bootInProgress) {
                             return;
