@@ -2301,10 +2301,13 @@
             const now = new Date();
             const currentYear = now.getFullYear();
             
-            // Build absolute bounds starting back from the exact same weekday 53 weeks ago
-            const startDate = new Date(currentYear, 0, 1); 
-            const startDayOffset = startDate.getDay(); 
-            startDate.setDate(startDate.getDate() - startDayOffset); // Backtrack to Sunday boundary
+            // Build absolute bounds: 53 weeks back from end of current week
+            const endDate = new Date(now);
+            // Move to end of current week (Saturday)
+            endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
+            
+            const startDate = new Date(endDate);
+            startDate.setDate(startDate.getDate() - (53 * 7) + 1); // 53 weeks back
 
             const totalDaysToRender = 53 * 7; 
             const monthPositions = {};
