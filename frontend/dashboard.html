@@ -143,11 +143,12 @@
 
         <main class="flex-1 overflow-y-auto p-6 lg:p-10 flex flex-col gap-8">
             
-            <header class="flex justify-between items-center bg-white dark:bg-zinc-900 rounded-xl p-4 border border-zinc-200 dark:border-zinc-700">
-                <div class="flex items-center gap-3 pl-2">
+            <header class="flex flex-wrap items-center gap-3 bg-white dark:bg-zinc-900 rounded-xl p-4 border border-zinc-200 dark:border-zinc-700">
+                <div class="flex items-center gap-3 pl-2 flex-1 min-w-0">
                     <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Habits & Topics Explorer</h1>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <input type="text" id="searchInput" placeholder="Search items..." oninput="filterItems()" class="w-40 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-600 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-100 text-zinc-900 dark:text-zinc-100">
                     <div id="syncStatusIndicator" class="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-semibold" title="Data Sync Status">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span id="syncStatusText">Online</span>
@@ -156,6 +157,12 @@
                     <button onclick="handleExportData()" class="p-2.5 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-xl text-gray-600 dark:text-zinc-300 transition flex items-center gap-1.5 text-xs font-semibold" title="Export Data (JSON/CSV)">
                         <i data-lucide="download" class="w-4 h-4"></i> Export
                     </button>
+
+                    <button onclick="handleImportData()" class="p-2.5 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-xl text-gray-600 dark:text-zinc-300 transition flex items-center gap-1.5 text-xs font-semibold" title="Import Data (JSON)">
+                        <i data-lucide="upload" class="w-4 h-4"></i> Import
+                    </button>
+
+                    <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="processImportFile(event)">
 
                     <button onclick="openAppSettingsModal()" class="p-2.5 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-xl text-gray-600 dark:text-zinc-300 transition" title="Settings">
                         <i data-lucide="settings" class="w-4 h-4"></i>
@@ -240,12 +247,11 @@
                         <div id="unifiedItemsList" class="space-y-1 divide-y divide-zinc-50 dark:divide-zinc-800 overflow-y-auto max-h-[340px] pr-1"></div>
                     </div>
 
-                    <div class="lg:col-span-5 bg-zinc-900 dark:bg-zinc-950 border border-zinc-800 dark:border-zinc-900 rounded-xl p-6 text-white flex flex-col justify-between min-h-[380px] relative overflow-hidden">
+                    <div id="quickNotesSidebar" class="lg:col-span-5 bg-zinc-900 dark:bg-zinc-950 border border-zinc-800 dark:border-zinc-900 rounded-xl p-6 text-white flex flex-col justify-between min-h-[380px] relative overflow-hidden">
                         <div>
                             <h3 class="text-lg font-bold">Quick Notes & Deep Dives</h3>
-                            <p class="text-zinc-400 dark:text-zinc-500 text-xs mt-1 leading-relaxed">Art and Love are the same Thing:.</p>
-                            <div class="mt-6 space-y-4 border-l-2 border-white/10 dark:border-zinc-800 pl-4 py-1">
-                                <p class="text-sm font-medium text-zinc-200 italic">"It's the process of seeing yourself in things that are not you."</p>
+                            <p class="text-zinc-400 dark:text-zinc-500 text-xs mt-1 leading-relaxed" id="quickNotesSubtext">Capture ideas as they come.</p>
+                            <div id="quickNotesPreview" class="mt-6 space-y-4 border-l-2 border-white/10 dark:border-zinc-800 pl-4 py-1 hidden">
                             </div>
                         </div>
                         <button onclick="switchTab('notes')" class="mt-8 bg-white/10 hover:bg-white dark:hover:bg-zinc-100 text-white hover:text-zinc-900 dark:hover:text-zinc-900 w-full font-bold text-sm py-3 px-4 rounded-lg transition flex items-center justify-center gap-2 border border-white/5 dark:border-zinc-800">
@@ -348,7 +354,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl p-6">
+                    <div id="dailyEnergyLogSection" class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl p-6 hidden">
                         <div class="flex justify-between items-center mb-6">
                             <div>
                                 <h3 class="text-lg font-bold text-zinc-900 dark:text-zinc-100">Daily Energy Log</h3>
@@ -429,9 +435,12 @@
             </section>
 
             <section id="tab-notes" class="tab-content hidden space-y-6">
-                <div class="flex justify-between items-center">
+                <div class="flex flex-wrap items-center gap-3">
                     <h2 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100 tick-motif">Notes Workspace</h2>
-                    <button onclick="createNewNote()" class="bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition"><i data-lucide="file-plus" class="w-4 h-4"></i> New Entry</button>
+                    <div class="flex items-center gap-2 ml-auto">
+                        <input type="text" id="notesSearchInput" placeholder="Search notes..." oninput="renderNotesList()" class="w-36 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-600 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-100 text-zinc-900 dark:text-zinc-100">
+                        <button onclick="createNewNote()" class="bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition"><i data-lucide="file-plus" class="w-4 h-4"></i> New Entry</button>
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-16rem)]">
                     <div class="lg:col-span-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl p-4 flex flex-col overflow-hidden">
@@ -514,12 +523,7 @@
             storageMode: getStorageMode()
         };
 
-        console.log('[INIT] dashboard module loaded', { 
-            firebaseConfig: !!firebaseConfig.apiKey, 
-            storageMode: window.state.storageMode,
-            isTauri: isTauriEnv(),
-            GOOGLE_USE_REDIRECT 
-        });
+        // dashboard module loaded
 
         window.addEventListener('error', (e) => {
             console.error('[GLOBAL-ERROR]', e.message, 'at', e.filename, ':', e.lineno);
@@ -639,14 +643,11 @@
         };
 
         async function bootWorkspaceForUser(user, animate = false) {
-            console.log('[BOOT] bootWorkspaceForUser start', { uid: user.uid, animate, storageMode: window.state.storageMode });
             try {
                 window.state.user = user;
                 const loginScreen = document.getElementById('loginScreen');
                 const mainApp = document.getElementById('mainApp');
                 const userDisplay = document.getElementById('userDisplay');
-
-                console.log('[BOOT] DOM refs found:', { 
                     loginScreen: !!loginScreen, 
                     mainApp: !!mainApp, 
                     userDisplay: !!userDisplay 
@@ -654,8 +655,6 @@
 
             const isLocal = window.state.storageMode === 'local';
             userDisplay.innerHTML = `<span class="text-xs font-semibold">${escapeHtml(user.displayName || user.email)} ${isLocal ? '(Local)' : ''}</span> <button onclick="logout()" class="ml-2 text-red-400 dark:text-red-500 hover:text-red-300 text-xs underline">Exit</button>`;
-
-            console.log('[BOOT] creating storage adapter...');
             // Initialize StorageAdapter
             try {
                 window.storageAdapter = await createStorageAdapter(
@@ -667,10 +666,7 @@
                 console.error('[BOOT] createStorageAdapter FAILED:', adapterErr);
                 throw adapterErr;
             }
-            console.log('[BOOT] storage adapter created:', window.storageAdapter.getMode());
-
             // Clean previous listeners
-            console.log('[BOOT] cleaning previous listeners:', unsubscribers.length);
             unsubscribers.forEach(u => typeof u === 'function' && u());
             unsubscribers = [];
 
@@ -690,9 +686,7 @@
             }
 
             // 1. Subscribe to Items
-            console.log('[BOOT] subscribing to items...');
             const unsubItems = window.storageAdapter.subscribe('items', (data) => {
-                console.log('[BOOT/items] snapshot received, count:', data.length);
                 const userItems = isLocal ? data : data.filter(item => item.userId === user.uid);
                 window.state.items = userItems.map(item => ({
                     ...item,
@@ -707,74 +701,48 @@
                 scheduleRender('calendar', renderCalendarViews);
             });
             unsubscribers.push(unsubItems);
-            console.log('[BOOT] items subscribed');
-
             // 2. Subscribe to Logs
-            console.log('[BOOT] subscribing to logs...');
             const unsubLogs = window.storageAdapter.subscribe('logs', (data) => {
-                console.log('[BOOT/logs] snapshot received, count:', data.length);
                 window.state.logs = isLocal ? data : data.filter(log => log.userId === user.uid);
                 scheduleRender('dashboard', renderDashboard);
                 scheduleRender('analytics', renderAnalyticsViews);
                 scheduleRender('calendar', renderCalendarViews);
             });
             unsubscribers.push(unsubLogs);
-            console.log('[BOOT] logs subscribed');
-
             // 3. Subscribe to Notes
-            console.log('[BOOT] subscribing to notes...');
             const unsubNotes = window.storageAdapter.subscribe('notes', (data) => {
-                console.log('[BOOT/notes] snapshot received, count:', data.length);
                 window.state.notes = isLocal ? data : data.filter(n => n.userId === user.uid);
                 scheduleRender('notes', renderNotesList);
+                refreshQuickNotesSidebar();
             });
             unsubscribers.push(unsubNotes);
-            console.log('[BOOT] notes subscribed');
 
             // 4. Subscribe to Seasons
-            console.log('[BOOT] subscribing to seasons...');
             const unsubSeasons = window.storageAdapter.subscribe('seasons', (data) => {
-                console.log('[BOOT/seasons] snapshot received, count:', data.length);
                 window.state.seasons = isLocal ? data : data.filter(s => s.userId === user.uid);
                 scheduleRender('seasons', renderSeasonsView);
             });
             unsubscribers.push(unsubSeasons);
-            console.log('[BOOT] seasons subscribed');
-
             // 5. Subscribe to Backlog
-            console.log('[BOOT] subscribing to backlog...');
             const unsubBacklog = window.storageAdapter.subscribe('backlog', (data) => {
-                console.log('[BOOT/backlog] snapshot received, count:', data.length);
                 window.state.backlog = isLocal ? data : data.filter(b => b.userId === user.uid);
                 scheduleRender('seasons', renderSeasonsView);
             });
             unsubscribers.push(unsubBacklog);
-            console.log('[BOOT] backlog subscribed');
-
             // 6. Subscribe to Daily Logs
-            console.log('[BOOT] subscribing to dailyLogs...');
             const unsubDaily = window.storageAdapter.subscribe('dailyLogs', (data) => {
-                console.log('[BOOT/dailyLogs] snapshot received, count:', data.length);
                 window.state.dailyLogs = isLocal ? data : data.filter(d => d.userId === user.uid);
                 scheduleRender('seasons', renderSeasonsView);
             });
             unsubscribers.push(unsubDaily);
-            console.log('[BOOT] dailyLogs subscribed');
-
             // 7. Subscribe to Habit Logs
-            console.log('[BOOT] subscribing to habitLogs...');
             const unsubHabit = window.storageAdapter.subscribe('habitLogs', (data) => {
-                console.log('[BOOT/habitLogs] snapshot received, count:', data.length);
                 window.state.habitLogs = isLocal ? data : data.filter(h => h.userId === user.uid);
                 scheduleRender('seasons', renderSeasonsView);
             });
             unsubscribers.push(unsubHabit);
-            console.log('[BOOT] habitLogs subscribed');
-
             // 8. Subscribe to Meta ActiveTimer (Multi-Device Single Active Timer Invariant)
-            console.log('[BOOT] subscribing to meta/activeTimer...');
             const unsubActiveTimer = window.storageAdapter.subscribe('meta/activeTimer', (activeTimerDoc) => {
-                console.log('[BOOT/activeTimer] snapshot received:', activeTimerDoc);
                 if (window.state.storageMode !== 'cloud' || !activeTimerDoc) return;
                 const localRunningItem = window.state.items.find(i => i.isRunning);
                 if (localRunningItem && activeTimerDoc.itemId && activeTimerDoc.itemId !== localRunningItem.id) {
@@ -784,37 +752,27 @@
                 }
             });
             unsubscribers.push(unsubActiveTimer);
-            console.log('[BOOT] activeTimer subscribed');
-
             if (coreGlobalLoop) clearInterval(coreGlobalLoop);
             coreGlobalLoop = setInterval(processingEngineCycle, 1000);
-            console.log('[BOOT] coreGlobalLoop started, interval:', coreGlobalLoop);
-
             // Show main app immediately — don't block on animation.
             // Kick off a quick non-blocking cross-fade so the transition feels smooth
             // without delaying data binding or subscriptions.
             if (animate) {
-                console.log('[BOOT-ANIM] starting animated transition');
                 loginScreen.classList.add('screen-exit');
                 mainApp.classList.remove('hidden');
                 mainApp.classList.add('screen-enter');
                 loginScreen.addEventListener('animationend', function handler() {
-                    console.log('[BOOT-ANIM] loginScreen animationend fired');
                     loginScreen.removeEventListener('animationend', handler);
                     loginScreen.classList.add('hidden');
                 });
                 mainApp.addEventListener('animationend', function handler() {
-                    console.log('[BOOT-ANIM] mainApp animationend fired');
                     mainApp.removeEventListener('animationend', handler);
                     mainApp.classList.remove('screen-enter');
                 });
             } else {
-                console.log('[BOOT-ANIM] instant transition (no animation)');
                 loginScreen.classList.add('hidden');
                 mainApp.classList.remove('hidden');
             }
-            console.log('[BOOT-ANIM] animation setup complete, mainApp hidden:', mainApp.classList.contains('hidden'), 'loginScreen hidden:', loginScreen.classList.contains('hidden'));
-
             // Silent startup update check for desktop app
             if (isTauriEnv() && window.__TAURI__?.updater?.checkUpdate) {
                 window.__TAURI__.updater.checkUpdate().then(update => {
@@ -826,21 +784,16 @@
 
             // Check onboarding tour flag
             const hasSeen = localStorage.getItem(`onboarding_seen_${user.uid}`);
-            console.log('[BOOT] onboarding seen:', hasSeen);
             if (!hasSeen) {
-                console.log('[BOOT] starting onboarding tour');
                 try {
                     startOnboardingTour(() => {
-                        console.log('[BOOT] onboarding tour complete');
                         localStorage.setItem(`onboarding_seen_${user.uid}`, 'true');
                     });
                 } catch (tourErr) {
                     console.error('[BOOT] onboarding tour FAILED:', tourErr);
                 }
             } else {
-                console.log('[BOOT] skipping onboarding tour');
             }
-            console.log('[BOOT] bootWorkspaceForUser complete');
         } catch (err) {
             console.error('Workspace boot failed:', err);
             showToast('Failed to load workspace. Please try again.', 'error');
@@ -882,13 +835,10 @@
 
             const initialMode = getStorageMode();
             window.selectStorageMode(initialMode);
-            console.log('[DOM] storageMode set to:', window.state.storageMode, 'from getStorageMode():', initialMode);
-
             if (auth) {
                 onAuthStateChanged(auth, async (user) => {
                     const currentMode = window.state.storageMode || getStorageMode();
                     window.state.storageMode = currentMode;
-                    console.log('[AUTH] onAuthStateChanged fired', { 
                         hasUser: !!user, 
                         uid: user?.uid, 
                         email: user?.email,
@@ -896,40 +846,30 @@
                         currentMode
                     });
                     if (user && currentMode === 'cloud') {
-                        console.log('[AUTH] cloud mode detected, booting workspace...');
                         if (bootInProgress) {
-                            console.log('[AUTH] boot already in progress, skipping');
                             return;
                         }
                         bootInProgress = true;
                         const animate = !!window._pendingLoginAnimation;
-                        console.log('[AUTH] animate flag:', animate);
                         window._pendingLoginAnimation = false;
                         setAuthLoading(false);
                         try {
-                            console.log('[AUTH] calling bootWorkspaceForUser...');
                             await bootWorkspaceForUser(user, animate);
-                            console.log('[AUTH] bootWorkspaceForUser resolved');
                         } catch (err) {
                             console.error('[AUTH] bootWorkspaceForUser threw:', err);
                         }
                         bootInProgress = false;
-                        console.log('[AUTH] bootInProgress set to false');
                     } else if (currentMode !== 'local') {
-                        console.log('[AUTH] showing login screen (no user or local mode), currentMode:', currentMode);
                         document.getElementById('loginScreen').classList.remove('hidden');
                         document.getElementById('mainApp').classList.add('hidden');
                     } else {
-                        console.log('[AUTH] local mode, booting without cloud auth');
                         if (bootInProgress) {
-                            console.log('[AUTH] boot already in progress, skipping');
                             return;
                         }
                         bootInProgress = true;
                         const dummyUser = { uid: 'local_user', displayName: 'Local Device User', email: 'local@device' };
                         try {
                             await bootWorkspaceForUser(dummyUser, false);
-                            console.log('[AUTH] local bootWorkspaceForUser resolved');
                         } catch (err) {
                             console.error('[AUTH] local bootWorkspaceForUser threw:', err);
                         }
@@ -1005,19 +945,15 @@
         window.login = async function() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
-            console.log('[LOGIN] login() called', { email });
             
             try {
                 setAuthLoading(true);
                 window._pendingLoginAnimation = true;
-                console.log('[LOGIN] calling signInWithEmailAndPassword...');
                 await authWithTimeout(signInWithEmailAndPassword(auth, email, password));
-                console.log('[LOGIN] signInWithEmailAndPassword resolved');
                 document.getElementById('loginEmail').value = '';
                 document.getElementById('loginPassword').value = '';
                 document.getElementById('loginError').innerText = '';
                 setAuthLoading(false);
-                console.log('[LOGIN] setAuthLoading(false) done');
             } catch (e) {
                 console.error('[LOGIN] signInWithEmailAndPassword failed:', e);
                 document.getElementById('loginError').innerText = e.message;
@@ -1531,7 +1467,51 @@
             }
         };
 
-        // --- Settings Modal Handler ---
+        window.handleImportData = function() {
+            document.getElementById('importFileInput').click();
+        };
+
+        window.processImportFile = async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+                if (!data || typeof data !== 'object') throw new Error('Invalid format');
+
+                let imported = 0;
+                if (data.items && window.storageAdapter.createItem) {
+                    for (const item of data.items) {
+                        await window.storageAdapter.createItem(item);
+                        imported++;
+                    }
+                }
+                if (data.logs && window.storageAdapter.createLog) {
+                    for (const log of data.logs) {
+                        await window.storageAdapter.createLog(log);
+                        imported++;
+                    }
+                }
+                if (data.notes && window.storageAdapter.upsertNote) {
+                    for (const note of data.notes) {
+                        await window.storageAdapter.upsertNote(note);
+                        imported++;
+                    }
+                }
+                if (data.seasons && window.storageAdapter.createSeason) {
+                    for (const season of data.seasons) {
+                        await window.storageAdapter.createSeason(season);
+                        imported++;
+                    }
+                }
+
+                window.showToast(`Imported ${imported} items.`);
+            } catch(e) {
+                console.error("Import error:", e);
+                window.showToast("Import failed — check file format.", "warning");
+            }
+            event.target.value = '';
+        };
         window.openAppSettingsModal = function() {
             const existing = document.getElementById('appSettingsModalOverlay');
             if (existing) existing.remove();
@@ -1783,6 +1763,8 @@
                 renderSeasonDetail();
             } else {
                 detailContainer.classList.add('hidden');
+                const energyLogSection = document.getElementById('dailyEnergyLogSection');
+                if (energyLogSection) energyLogSection.classList.add('hidden');
                 renderSeasonsList();
             }
         }
@@ -1792,7 +1774,7 @@
             if (!listContainer) return;
 
             if (window.state.seasons.length === 0) {
-                listContainer.innerHTML = '<div class="p-8 text-center text-xs text-zinc-400 dark:text-zinc-500 italic bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700">No seasons initialized yet. Create your first season above to begin.</div>';
+                listContainer.innerHTML = '<div class="p-8 text-center text-xs text-zinc-400 dark:text-zinc-500 italic bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700">No seasons yet. Create one above.</div>';
                 return;
             }
 
@@ -1866,6 +1848,13 @@
 
             renderBacklog();
             renderDailyLogs();
+
+            const energyLogSection = document.getElementById('dailyEnergyLogSection');
+            const activeSeason = getActiveSeason();
+            if (energyLogSection) {
+                energyLogSection.classList.toggle('hidden', !activeSeason);
+            }
+
             lucide.createIcons();
         }
 
@@ -1883,7 +1872,7 @@
             }
 
             if (unpromoted.length === 0) {
-                container.innerHTML = '<div class="text-xs text-zinc-400 dark:text-zinc-500 italic text-center py-6">All ideas are currently in motion. Nothing parked here.</div>';
+                container.innerHTML = '<div class="text-xs text-zinc-400 dark:text-zinc-500 italic text-center py-6">Nothing parked here.</div>';
             } else {
                 container.innerHTML = unpromoted.map(item => {
                     return `
@@ -1927,7 +1916,7 @@
             logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
             if (logs.length === 0) {
-                container.innerHTML = '<div class="text-xs text-zinc-400 dark:text-zinc-500 italic text-center py-4">No entries logged yet. Start by adding one above.</div>';
+                container.innerHTML = '<div class="text-xs text-zinc-400 dark:text-zinc-500 italic text-center py-4">No entries logged yet.</div>';
             } else {
                 container.innerHTML = logs.map(log => {
                     const isProduction = log.energyType === 'production';
@@ -2061,17 +2050,41 @@
             lucide.createIcons();
         }
 
+        function filterItems() {
+            renderDashboard();
+        }
+
+        window.togglePin = async function(id) {
+            const item = window.state.items.find(i => i.id === id);
+            if (!item || !window.storageAdapter) return;
+            item.pinned = !item.pinned;
+            await window.storageAdapter.updateItem(id, { pinned: item.pinned });
+            renderDashboard();
+        };
+
+        window.filterItems = function() {
+            renderDashboard();
+        };
+
         function renderDashboard() {
             const container = document.getElementById('unifiedItemsList');
             if(!container) return;
             container.innerHTML = '';
+
+            const query = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
 
             let totalTopicSec = 0;
             let totalHabitSec = 0;
 
             const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-            window.state.items.forEach(item => {
+            const filteredItems = query
+                ? window.state.items.filter(i => i.name.toLowerCase().includes(query))
+                : window.state.items;
+
+            filteredItems.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+
+            filteredItems.forEach(item => {
                 const historicalSeconds = window.state.logs
                     .filter(l => l.itemId === item.id && new Date(l.timestamp) >= monthStart)
                     .reduce((acc, curr) => acc + curr.seconds, 0);
@@ -2106,17 +2119,18 @@
                 `;
             }
 
-            if (window.state.items.length === 0) {
-                container.innerHTML = `<div class="p-8 text-center text-xs text-zinc-400 dark:text-zinc-500 italic">No tracking entries initialized yet. Add above.</div>`;
-                document.getElementById('statsSubHeader').innerText = "0 focus monitors active.";
+            if (filteredItems.length === 0) {
+                const msg = query ? `No items matching "${query}".` : 'No items yet. Add one above.';
+                container.innerHTML = `<div class="p-8 text-center text-xs text-zinc-400 dark:text-zinc-500 italic">${msg}</div>`;
+                document.getElementById('statsSubHeader').innerText = query ? `0 of ${window.state.items.length} items match.` : "No items tracked.";
                 syncActiveMonitorPanel();
                 lucide.createIcons();
                 return;
             }
 
-            document.getElementById('statsSubHeader').innerText = `${window.state.items.length} focus monitors configured in local viewport structure.`;
+            document.getElementById('statsSubHeader').innerText = `${filteredItems.length} of ${window.state.items.length} item${window.state.items.length !== 1 ? 's' : ''} tracked.`;
 
-            window.state.items.forEach(item => {
+            filteredItems.forEach(item => {
                 const historicalSeconds = window.state.logs.filter(l => l.itemId === item.id).reduce((acc, curr) => acc + curr.seconds, 0);
                 const isSelected = window.state.selectedItemId === item.id;
                 
@@ -2125,7 +2139,10 @@
                 elementRow.onclick = () => selectItemForTimer(item.id);
 
                 elementRow.innerHTML = `
-                    <div class="col-span-5 flex items-center gap-3">
+                    <div class="col-span-5 flex items-center gap-2">
+                        <button onclick="event.stopPropagation(); togglePin('${item.id}')" class="p-1 rounded text-zinc-300 dark:text-zinc-600 hover:text-amber-500 dark:hover:text-amber-400 transition ${item.pinned ? 'text-amber-500 dark:text-amber-400' : ''}">
+                            <i data-lucide="pin" class="w-3 h-3 ${item.pinned ? 'fill-current' : ''}"></i>
+                        </button>
                         <div class="w-2 h-2 rounded-full ${item.type === 'topic' ? 'bg-zinc-400 dark:bg-zinc-500' : 'bg-zinc-700 dark:bg-zinc-300'}"></div>
                         <div>
                             <div class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">${escapeHtml(item.name)}</div>
@@ -2147,7 +2164,28 @@
             });
 
             syncActiveMonitorPanel();
+            refreshQuickNotesSidebar();
             lucide.createIcons();
+        }
+
+        function refreshQuickNotesSidebar() {
+            const sidebar = document.getElementById('quickNotesSidebar');
+            if (!sidebar) return;
+            const preview = document.getElementById('quickNotesPreview');
+            const subtext = document.getElementById('quickNotesSubtext');
+            if (!preview || !subtext) return;
+
+            const recent = window.state.notes.slice(-3).reverse();
+            if (recent.length === 0) {
+                preview.classList.add('hidden');
+                subtext.innerText = 'Capture ideas as they come.';
+            } else {
+                preview.classList.remove('hidden');
+                subtext.innerText = `${window.state.notes.length} note${window.state.notes.length !== 1 ? 's' : ''} saved.`;
+                preview.innerHTML = recent.map(n =>
+                    `<p class="text-sm font-medium text-zinc-200 truncate">${escapeHtml(n.title || 'Untitled')}</p>`
+                ).join('');
+            }
         }
 
         function renderAnalyticsViews() {
@@ -2409,12 +2447,18 @@
             if(!container) return;
             container.innerHTML = '';
 
-            if(window.state.notes.length === 0) {
-                container.innerHTML = `<div class="text-xs text-zinc-400 dark:text-zinc-500 italic text-center py-8">No notes tracked. Click 'New Entry' above.</div>`;
+            const query = (document.getElementById('notesSearchInput')?.value || '').toLowerCase().trim();
+            const filteredNotes = query
+                ? window.state.notes.filter(n => (n.title || '').toLowerCase().includes(query) || (n.body || '').toLowerCase().includes(query))
+                : window.state.notes;
+
+            if(filteredNotes.length === 0) {
+                const msg = query ? `No notes matching "${query}".` : 'No notes yet.';
+                container.innerHTML = `<div class="text-xs text-zinc-400 dark:text-zinc-500 italic text-center py-8">${msg}</div>`;
                 return;
             }
 
-            window.state.notes.forEach(note => {
+            filteredNotes.forEach(note => {
                 const isSelected = window.state.selectedNoteId === note.id;
                 const card = document.createElement('div');
                 card.className = `p-4 rounded-lg border text-left cursor-pointer transition relative ${isSelected ? 'bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-600' : 'bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200/70 dark:border-zinc-700 hover:bg-white dark:hover:bg-zinc-700'}`;

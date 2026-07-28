@@ -244,26 +244,20 @@ export class FirebaseAdapter extends StorageAdapter {
         } else {
             ref = this._getUserColRef(colName);
         }
-
-        console.log(`[FB-ADAPTER] subscribe('${colName}') setting up onSnapshot, uid:`, this.uid);
         const startTime = Date.now();
         const unsub = onSnapshot(ref, (snapshot) => {
             const elapsed = Date.now() - startTime;
             if (snapshot.docs) {
                 const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-                console.log(`[FB-ADAPTER] subscribe('${colName}') snapshot received after ${elapsed}ms, docs: ${data.length}`);
                 callback(data);
             } else if (snapshot.exists) {
-                console.log(`[FB-ADAPTER] subscribe('${colName}') single doc snapshot received after ${elapsed}ms, exists:`, snapshot.exists);
                 callback({ id: snapshot.id, ...snapshot.data() });
             } else {
-                console.log(`[FB-ADAPTER] subscribe('${colName}') empty snapshot received after ${elapsed}ms`);
                 callback(null);
             }
         }, (error) => {
             console.error(`[FB-ADAPTER] subscribe('${colName}') onSnapshot ERROR:`, error);
         });
-        console.log(`[FB-ADAPTER] subscribe('${colName}') onSnapshot listener registered`);
         return unsub;
     }
 }
