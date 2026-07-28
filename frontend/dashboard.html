@@ -523,7 +523,11 @@
             storageMode: getStorageMode()
         };
 
-        // dashboard module loaded
+        // Pre-register critical globals so inline event handlers (onclick, oninput)
+        // always find a function, even if the module fails partway through.
+        window.filterItems = window.filterItems || filterItems;
+        window.switchTab = window.switchTab || switchTab;
+        window.showTab = window.showTab || showTab;
 
         window.addEventListener('error', (e) => {
             console.error('[GLOBAL-ERROR]', e.message, 'at', e.filename, ':', e.lineno);
@@ -1965,6 +1969,7 @@
         }
         window.switchTab = switchTab;
 
+        window.showTab = showTab;
         function showTab(tabId) {
             document.getElementById('loginTab').classList.toggle('hidden', tabId !== 'loginTab');
             document.getElementById('registerTab').classList.toggle('hidden', tabId !== 'registerTab');
@@ -2217,6 +2222,7 @@
         }
 
         /* DYNAMIC CALENDAR & GITHUB CONTRIBUTION GRID OPERATIONS */
+        window.changeMonth = changeMonth;
         function changeMonth(dir) {
             window.state.currentCalendarDate.setMonth(window.state.currentCalendarDate.getMonth() + dir);
             renderCalendarViews();
@@ -2419,6 +2425,7 @@
         }
 
         /* NOTES LIST SELECTION ARCHITECTURE */
+        window.renderNotesList = renderNotesList;
         function renderNotesList() {
             const container = document.getElementById('notesList');
             if(!container) return;
