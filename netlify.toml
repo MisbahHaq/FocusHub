@@ -1,13 +1,33 @@
 [build]
-  base    = "frontend"
-  command = "node ../scripts/build-frontend.cjs"
-  publish = "."
+  base    = "."
+  command = "npm run build"
+  publish = "frontend/dist"
 
 [build.environment]
-  # Firebase web config is client-side and safe to expose to the browser.
-  # These keys are intentionally shipped in env.js, so exclude them from
-  # Netlify's secrets scanner (which would otherwise fail the build).
   SECRETS_SCAN_OMIT_KEYS = "FIREBASE_API_KEY,FIREBASE_AUTH_DOMAIN,FIREBASE_PROJECT_ID,FIREBASE_STORAGE_BUCKET,FIREBASE_MESSAGING_SENDER_ID,FIREBASE_APP_ID,FIREBASE_MEASUREMENT_ID,CLOUDINARY_CLOUD_NAME,CLOUDINARY_UPLOAD_PRESET"
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Content-Security-Policy = """
+      default-src 'self';
+      script-src 'self' https://www.gstatic.com https://unpkg.com https://cdn.tailwindcss.com 'unsafe-inline' 'unsafe-eval';
+      style-src 'self' https://fonts.googleapis.com https://unpkg.com 'unsafe-inline';
+      font-src 'self' https://fonts.gstatic.com;
+      img-src 'self' data:;
+      connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com;
+      frame-ancestors 'none';
+    """
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [[redirects]]
   from = "/*"

@@ -10,11 +10,16 @@
   },
   "scripts": {
     "tauri": "tauri",
-    "dev": "tauri dev",
-    "build": "tauri build",
+    "dev": "vite dev",
+    "dev:tauri": "tauri dev",
+    "build": "node scripts/build-frontend.cjs && vite build && copy /Y frontend\\env.js frontend\\dist\\env.js 2>NUL || true",
+    "build:tauri": "tauri build",
     "build:env": "node scripts/build-frontend.cjs",
+    "preview": "vite preview",
     "static-server": "node scripts/static-server.cjs",
     "deploy:rules": "firebase deploy --only firestore:rules",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:rules": "firebase emulators:exec --only firestore 'node scripts/test-rules.cjs'",
     "lint": "eslint frontend/js/",
     "lint:fix": "eslint frontend/js/ --fix",
@@ -22,15 +27,21 @@
     "format:check": "prettier --check 'frontend/js/**/*.js'"
   },
   "dependencies": {
-    "firebase": "^12.13.0"
+    "firebase": "^12.13.0",
+    "lucide": "^1.27.0"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.5.0",
     "@firebase/rules-unit-testing": "^3.0.0",
+    "@tauri-apps/cli": "^2.5.0",
+    "autoprefixer": "^10.5.4",
+    "eslint": "^9.0.0",
     "ico": "^0.3.3",
     "png-to-ico": "^3.0.2",
+    "postcss": "^8.5.24",
+    "prettier": "^3.3.0",
     "sharp": "^0.35.3",
-    "eslint": "^9.0.0",
-    "prettier": "^3.3.0"
+    "tailwindcss": "^3.4.19",
+    "vite": "^8.1.5",
+    "vitest": "^3.2.7"
   }
 }

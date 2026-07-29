@@ -1,0 +1,1 @@
+{"version":3,"file":"index-DrtWjWJi.js","names":["lucide.createIcons"],"sources":["../../js/main-index.js"],"sourcesContent":["import { toggleTheme, applySavedTheme } from './utils/theme.js';\nimport * as lucide from 'lucide';\n\nlucide.createIcons();\nwindow.toggleTheme = toggleTheme;\napplySavedTheme();\n"],"mappings":"uDAGAA,EAAmB,EACnB,OAAO,YAAc,EACrB,EAAgB"}
