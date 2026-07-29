@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="fav.png" type="image/png">
+    <link rel="icon" href="favicon.ico" type="image/x-icon" sizes="16x16 32x32">
     <link rel="apple-touch-icon" href="fav.png">
     <meta name="theme-color" content="#1e1e1e">
     <title>Focus Synergy - Habits, Topics & Analytics</title>
@@ -114,16 +115,16 @@
                 </div>
                 
                 <nav class="flex flex-col gap-6 w-full px-3" role="tablist" aria-label="Main navigation">
-                    <button onclick="switchTab('dashboard')" id="btn-dashboard" class="nav-btn w-full h-12 rounded-xl flex items-center justify-center transition-all bg-white/10 text-white" title="Tracker & Timer" role="tab" aria-selected="true" aria-controls="tab-dashboard">
+                    <button onclick="switchTab('dashboard')" id="btn-dashboard" class="nav-btn w-full h-12 rounded-xl flex items-center justify-center transition-all bg-white/10 text-white" title="Tracker & Timer" role="tab" aria-selected="true" aria-controls="tab-dashboard" aria-label="Tracker & Timer">
                         <i data-lucide="layout-grid" class="w-5 h-5"></i>
                     </button>
-<button onclick="switchTab('seasons')" id="btn-seasons" class="nav-btn w-full h-12 rounded-xl flex items-center justify-center transition-all text-gray-500 hover:bg-white/5 hover:text-gray-300" title="Seasons Planner" role="tab" aria-selected="false" aria-controls="tab-seasons">
+<button onclick="switchTab('seasons')" id="btn-seasons" class="nav-btn w-full h-12 rounded-xl flex items-center justify-center transition-all text-gray-500 hover:bg-white/5 hover:text-gray-300" title="Seasons Planner" role="tab" aria-selected="false" aria-controls="tab-seasons" aria-label="Seasons Planner">
                         <i data-lucide="sprout" class="w-5 h-5"></i>
                     </button>
-                    <button onclick="switchTab('calendar')" id="btn-calendar" class="nav-btn w-full h-12 rounded-xl flex items-center justify-center transition-all text-gray-500 hover:bg-white/5 hover:text-gray-300" title="Activity Calendar" role="tab" aria-selected="false" aria-controls="tab-calendar">
+                    <button onclick="switchTab('calendar')" id="btn-calendar" class="nav-btn w-full h-12 rounded-xl flex items-center justify-center transition-all text-gray-500 hover:bg-white/5 hover:text-gray-300" title="Activity Calendar" role="tab" aria-selected="false" aria-controls="tab-calendar" aria-label="Activity Calendar">
                         <i data-lucide="calendar" class="w-5 h-5"></i>
                     </button>
-                    <button onclick="switchTab('notes')" id="btn-notes" class="nav-btn w-full h-12 rounded-xl flex items-center justify-center transition-all text-gray-500 hover:bg-white/5 hover:text-gray-300" title="Notes Section" role="tab" aria-selected="false" aria-controls="tab-notes">
+                    <button onclick="switchTab('notes')" id="btn-notes" class="nav-btn w-full h-12 rounded-xl flex items-center justify-center transition-all text-gray-500 hover:bg-white/5 hover:text-gray-300" title="Notes Section" role="tab" aria-selected="false" aria-controls="tab-notes" aria-label="Notes Section">
                         <i data-lucide="book-open" class="w-5 h-5"></i>
                     </button>
                 </nav>
@@ -139,17 +140,17 @@
             <header class="flex items-center gap-2 bg-white dark:bg-zinc-900 rounded-xl px-4 py-3 border border-zinc-200 dark:border-zinc-700">
                 <h1 class="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex-1 min-w-0 truncate">Focus Synergy</h1>
                 <div class="flex items-center gap-1.5">
-                    <button onclick="handleExportData()" class="p-2 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-lg text-gray-500 dark:text-zinc-400 transition" title="Export Data">
+                    <button onclick="handleExportData()" class="p-2 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-lg text-gray-500 dark:text-zinc-400 transition" title="Export Data" aria-label="Export Data">
                         <i data-lucide="download" class="w-4 h-4"></i>
                     </button>
-                    <button onclick="handleImportData()" class="p-2 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-lg text-gray-500 dark:text-zinc-400 transition" title="Import Data">
+                    <button onclick="handleImportData()" class="p-2 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-lg text-gray-500 dark:text-zinc-400 transition" title="Import Data" aria-label="Import Data">
                         <i data-lucide="upload" class="w-4 h-4"></i>
                     </button>
                     <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="processImportFile(event)">
-                    <button onclick="openAppSettingsModal()" class="p-2 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-lg text-gray-500 dark:text-zinc-400 transition" title="Settings">
+                    <button onclick="openAppSettingsModal()" class="p-2 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-lg text-gray-500 dark:text-zinc-400 transition" title="Settings" aria-label="Settings">
                         <i data-lucide="settings" class="w-4 h-4"></i>
                     </button>
-                    <button onclick="toggleTheme()" id="themeToggle" class="p-2 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-lg text-gray-500 dark:text-zinc-400 transition relative" title="Cycle theme">
+                    <button onclick="toggleTheme()" id="themeToggle" class="p-2 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-lg text-gray-500 dark:text-zinc-400 transition relative" title="Cycle theme" aria-label="Cycle theme">
                         <i data-lucide="sun" class="w-4 h-4 dark-icon hidden"></i>
                         <i data-lucide="music" class="w-4 h-4 midnight-icon hidden"></i>
                         <i data-lucide="moon" class="w-4 h-4 light-icon"></i>
@@ -186,7 +187,8 @@
                         </div>
 
                         <div class="my-auto py-2 z-10 flex items-baseline gap-3">
-                            <div id="timerDisplay" class="text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-mono" aria-live="polite" aria-atomic="true">00:00:00</div>
+                            <div id="timerA11y" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+                            <div id="timerDisplay" class="text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-mono" aria-live="off" aria-atomic="true">00:00:00</div>
                             <span class="text-xs bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-mono px-2 py-0.5 rounded-full font-medium" id="streakBadge">Session Counter</span>
                         </div>
                         
@@ -401,8 +403,8 @@
                         <div class="flex justify-between items-center bg-white dark:bg-zinc-900 rounded-xl p-5 border border-zinc-200 dark:border-zinc-700">
                             <h3 id="calendarMonthYear" class="text-base font-bold text-zinc-800 dark:text-zinc-200">Month Year</h3>
                             <div class="flex gap-1">
-                                <button onclick="changeMonth(-1)" class="p-2 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 transition"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
-                                <button onclick="changeMonth(1)" class="p-2 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 transition"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                                <button onclick="changeMonth(-1)" class="p-2 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 transition" title="Previous month" aria-label="Previous month"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                                <button onclick="changeMonth(1)" class="p-2 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 transition" title="Next month" aria-label="Next month"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
                             </div>
                         </div>
                         <div class="bg-white dark:bg-zinc-900 rounded-xl p-6 border border-zinc-200 dark:border-zinc-700">

@@ -3,6 +3,8 @@
  * Computes analytics and renders summary modal for finished/previewed seasons.
  */
 
+import { escapeHtml } from '../utils/sanitize.js';
+
 export function calculateSeasonRetrospective(season, logs = [], dailyLogs = [], habitLogs = []) {
     if (!season) return null;
 
@@ -94,7 +96,7 @@ export function renderRetrospectiveModal(retroData) {
                 <div class="flex justify-between items-start border-b border-zinc-200 dark:border-zinc-800 pb-4">
                     <div>
                         <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">Season Retrospective</span>
-                        <h2 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">${season.title || 'Season Overview'}</h2>
+                        <h2 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">${escapeHtml(season.title) || 'Season Overview'}</h2>
                         <p class="text-xs text-zinc-500 mt-1">${new Date(season.startDate).toLocaleDateString()} — ${new Date(season.endDate).toLocaleDateString()}</p>
                     </div>
                     <button onclick="closeRetroModal()" class="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition">

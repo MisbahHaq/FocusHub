@@ -36,11 +36,11 @@ export function convertLogsToCsv(logs, itemsMap = {}) {
 }
 
 export function convertDailyLogsToCsv(dailyLogs) {
-    const headers = ['Log ID', 'Date', 'Energy Mode', 'Timestamp'];
+    const headers = ['Log ID', 'Date', 'Energy Type', 'Timestamp'];
     const rows = dailyLogs.map(log => [
         log.id,
         log.date || '',
-        log.energyMode || '',
+        log.energyType || '',
         log.timestamp || ''
     ].join(','));
     return [headers.join(','), ...rows].join('\n');

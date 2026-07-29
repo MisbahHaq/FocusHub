@@ -2,4 +2,4 @@
 If you want to use all the icons you can import it like:
  \`import { createIcons, icons } from 'lucide';
 lucide.createIcons({icons});\``);if(r===void 0)throw Error("`createIcons()` only works in a browser environment.");if(Array.from(r.querySelectorAll(`[${t}]`)).forEach(r=>p(r,{nameAttr:t,icons:e,attrs:n})),i&&Array.from(r.querySelectorAll(`template`)).forEach(r=>m({icons:e,nameAttr:t,attrs:n,root:r.content,inTemplates:i})),t===`data-lucide`){let t=r.querySelectorAll(`[icon-name]`);t.length>0&&(console.warn(`[Lucide] Some icons were found with the now deprecated icon-name attribute. These will still be replaced for backwards compatibility, but will no longer be supported in v1.0 and you should switch to data-lucide`),Array.from(t).forEach(t=>p(t,{nameAttr:`icon-name`,icons:e,attrs:n})))}};export{r as n,t as r,m as t};
-//# sourceMappingURL=lucide-DGvI0MK8.js.map
+//# sourceMappingURL=lucide-DNsVxonw.js.map

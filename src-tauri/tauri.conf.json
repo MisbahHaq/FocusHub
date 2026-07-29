@@ -42,7 +42,7 @@
       }
     },
     "macOS": {
-      "signingIdentity": "TODO_APPLE_DEVELOPMENT_IDENTITY",
+      "signingIdentity": null,
       "entitlements": null,
       "exceptionDomain": null,
       "providerShortName": null
@@ -53,7 +53,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "TODO_TAURI_UPDATER_PUBLIC_KEY",
+      "pubkey": null,
       "endpoints": [
         "https://github.com/MisbahHaq/Focus-Synergy/releases/latest/download/latest.json"
       ]

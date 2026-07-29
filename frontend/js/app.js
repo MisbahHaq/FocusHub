@@ -1,5 +1,5 @@
 ﻿
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps } from "firebase/app";
 import { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 import { getAuth, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, updateProfile } from "firebase/auth";
 import * as lucide from 'lucide';
@@ -14,21 +14,43 @@ import { createStorageAdapter, getStorageMode, setStorageMode, migrateStorageDat
         import { formatTimeHMS, formatHoursAndMins, formatDateRange } from './utils/format.js';
         import { showToast, playSound } from './utils/ui.js';
         import { toggleTheme, applySavedTheme } from './utils/theme.js';
+import { createStore, subscribe, showError, showConfirm } from './utils/state.js';
 
         const GOOGLE_USE_REDIRECT = typeof window !== "undefined" && !!window.__TAURI_INTERNALS__;
         const firebaseConfig = window.__FIREBASE_CONFIG__ || {};
 
-        let app = null;
-        let db = null;
-        let auth = null;
+        let _firebaseApp = null;
+        let _firestore = null;
+        let _authInstance = null;
 
-        if (firebaseConfig.apiKey) {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
+        function ensureFirebase() {
+            if (_firebaseApp) return _firebaseApp;
+            if (!firebaseConfig.apiKey) return null;
+            if (getApps().length === 0) {
+                _firebaseApp = initializeApp(firebaseConfig);
+            } else {
+                _firebaseApp = getApps()[0];
+            }
+            return _firebaseApp;
         }
 
-        window.state = {
+        function getAuthInstance() {
+            if (_authInstance) return _authInstance;
+            const app = ensureFirebase();
+            if (!app) return null;
+            _authInstance = getAuth(app);
+            return _authInstance;
+        }
+
+        function getFirestoreDb() {
+            if (_firestore) return _firestore;
+            const app = ensureFirebase();
+            if (!app) return null;
+            _firestore = getFirestore(app);
+            return _firestore;
+        }
+
+        window.state = createStore({
             user: null,
             items: [],      
             logs: [],      
@@ -46,7 +68,7 @@ import { createStorageAdapter, getStorageMode, setStorageMode, migrateStorageDat
             breakNotificationsEnabled: true,
             breakThresholdMinutes: 50,
             storageMode: getStorageMode()
-        };
+        });
 
         // Pre-register critical globals so inline event handlers (onclick, oninput)
         // always find a function, even if the module fails partway through.
@@ -164,7 +186,7 @@ import { createStorageAdapter, getStorageMode, setStorageMode, migrateStorageDat
             try {
                 window.storageAdapter = await createStorageAdapter(
                     window.state.storageMode,
-                    db,
+                    getFirestoreDb(),
                     () => window.state.user?.uid
                 );
             } catch (adapterErr) {
@@ -324,7 +346,7 @@ import { createStorageAdapter, getStorageMode, setStorageMode, migrateStorageDat
             const staleItems = window.state.items.filter(item => item.isRunning && item.startedAt && (now - item.startedAt) > 24 * 60 * 60 * 1000);
             
             for (const item of staleItems) {
-                const confirmReset = confirm(`Timer for "${item.name || 'Item'}" was left running for > 24 hours. Do you want to reset this session?`);
+                const confirmReset = await showConfirm(`Timer for "${item.name || 'Item'}" was left running for > 24 hours. Do you want to reset this session?`);
                 if (confirmReset && window.storageAdapter) {
                     await window.storageAdapter.stopItemTimer(item.id, item.accumulatedSeconds || 0);
                 }
@@ -339,8 +361,8 @@ import { createStorageAdapter, getStorageMode, setStorageMode, migrateStorageDat
 
             const initialMode = getStorageMode();
             window.selectStorageMode(initialMode);
-            if (auth) {
-                onAuthStateChanged(auth, async (user) => {
+            if (getAuthInstance()) {
+                onAuthStateChanged(getAuthInstance(), async (user) => {
                     const currentMode = window.state.storageMode || getStorageMode();
                     window.state.storageMode = currentMode;
                     if (user && currentMode === 'cloud') {
@@ -385,9 +407,9 @@ import { createStorageAdapter, getStorageMode, setStorageMode, migrateStorageDat
             try {
                 setAuthLoading(true);
                 window._pendingLoginAnimation = true;
-                const cred = await authWithTimeout(createUserWithEmailAndPassword(auth, email, password));
+                const cred = await authWithTimeout(createUserWithEmailAndPassword(getAuthInstance(), email, password));
                 await authWithTimeout(updateProfile(cred.user, { displayName: name }));
-                await authWithTimeout(setDoc(doc(db, 'users', cred.user.uid), { name: name, email: email }));
+                await authWithTimeout(setDoc(doc(getFirestoreDb(), 'users', cred.user.uid), { name: name, email: email }));
                 document.getElementById('registerName').value = '';
                 document.getElementById('registerEmail').value = '';
                 document.getElementById('registerPassword').value = '';
@@ -447,7 +469,7 @@ import { createStorageAdapter, getStorageMode, setStorageMode, migrateStorageDat
             try {
                 setAuthLoading(true);
                 window._pendingLoginAnimation = true;
-                await authWithTimeout(signInWithEmailAndPassword(auth, email, password));
+                await authWithTimeout(signInWithEmailAndPassword(getAuthInstance(), email, password));
                 document.getElementById('loginEmail').value = '';
                 document.getElementById('loginPassword').value = '';
                 document.getElementById('loginError').innerText = '';
@@ -465,7 +487,9 @@ import { createStorageAdapter, getStorageMode, setStorageMode, migrateStorageDat
                 clearInterval(coreGlobalLoop);
                 coreGlobalLoop = null;
             }
-            window.state = {
+            unsubscribers.forEach(u => typeof u === 'function' && u());
+            unsubscribers = [];
+            Object.assign(window.state, {
                 user: null,
                 items: [],
                 logs: [],
@@ -480,9 +504,12 @@ import { createStorageAdapter, getStorageMode, setStorageMode, migrateStorageDat
                 currentCalendarDate: new Date(),
                 dailyEnergyMode: 'production',
                 backlogOpen: false,
+                breakNotificationsEnabled: true,
+                breakThresholdMinutes: 50,
                 storageMode: window.state.storageMode
-            };
-            await signOut(auth);
+            });
+            const authInst = getAuthInstance();
+            if (authInst) await signOut(authInst);
             document.getElementById('loginEmail').value = '';
             document.getElementById('loginPassword').value = '';
             document.getElementById('registerName').value = '';
@@ -497,9 +524,9 @@ import { createStorageAdapter, getStorageMode, setStorageMode, migrateStorageDat
                 setAuthLoading(true);
                 window._pendingLoginAnimation = true;
                 if (GOOGLE_USE_REDIRECT) {
-                    await authWithTimeout(signInWithRedirect(auth, provider));
+                    await authWithTimeout(signInWithRedirect(getAuthInstance(), provider));
                 } else {
-                    await authWithTimeout(signInWithPopup(auth, provider));
+                    await authWithTimeout(signInWithPopup(getAuthInstance(), provider));
                 }
                 setAuthLoading(false);
             } catch (e) {
@@ -510,14 +537,17 @@ import { createStorageAdapter, getStorageMode, setStorageMode, migrateStorageDat
         };
 
         if (GOOGLE_USE_REDIRECT) {
-            getRedirectResult(auth).catch((e) => {
+            const redirectAuth = getAuthInstance();
+            if (redirectAuth) getRedirectResult(redirectAuth).catch((e) => {
                 console.error("Google redirect sign-in failed:", e);
             });
         }
 
         function syncCollection(collectionName, orderField, callback) {
             const userId = window.state.user.uid;
-            const q = query(collection(db, 'users', userId, collectionName), orderBy(orderField, "asc"));
+            const fdb = getFirestoreDb();
+            if (!fdb) return;
+            const q = query(collection(fdb, 'users', userId, collectionName), orderBy(orderField, "asc"));
             onSnapshot(q, (snapshot) => {
                 const dataArray = [];
                 snapshot.forEach((doc) => {
@@ -566,6 +596,11 @@ import { createStorageAdapter, getStorageMode, setStorageMode, migrateStorageDat
             }
         };
 
+        function announceTimer(msg) {
+            const el = document.getElementById('timerA11y');
+            if (el) el.textContent = msg;
+        }
+
         window.toggleTimer = async function() {
             const activeItem = window.state.items.find(i => i.id === window.state.selectedItemId);
             if (!activeItem || !window.storageAdapter) return;
@@ -577,9 +612,11 @@ import { createStorageAdapter, getStorageMode, setStorageMode, migrateStorageDat
                 const newAccumulated = (activeItem.accumulatedSeconds || 0) + elapsed;
                 await window.storageAdapter.stopItemTimer(activeItem.id, newAccumulated);
                 resetTimerNotificationState(activeItem.id);
+                announceTimer(`Timer paused for ${activeItem.name}`);
             } else {
                 playSound('timer start');
                 await window.storageAdapter.startItemTimer(activeItem.id, now);
+                announceTimer(`Timer started for ${activeItem.name}`);
             }
         };
 
@@ -606,6 +643,7 @@ import { createStorageAdapter, getStorageMode, setStorageMode, migrateStorageDat
 
                 await window.storageAdapter.stopItemTimer(activeItem.id, 0);
                 resetTimerNotificationState(activeItem.id);
+                announceTimer(`${formatTimeHMS(totalLogged)} logged for ${activeItem.name}`);
             } catch(e) {
                 console.error("Error logging timer session", e);
             }
@@ -953,7 +991,7 @@ import { createStorageAdapter, getStorageMode, setStorageMode, migrateStorageDat
         // --- Export Data Handler ---
         window.handleExportData = async function() {
             if (!window.storageAdapter) {
-                alert("Storage adapter not ready.");
+                window.showToast("Storage adapter not ready.", "warning");
                 return;
             }
             try {
@@ -1091,12 +1129,13 @@ import { createStorageAdapter, getStorageMode, setStorageMode, migrateStorageDat
 
         window.switchStorageModeInSettings = async function() {
             const targetMode = window.state.storageMode === 'cloud' ? 'local' : 'cloud';
-            if (!confirm(`Switch storage mode to ${targetMode.toUpperCase()}? Your current data will be migrated to the target storage.`)) return;
+            const confirmed = await showConfirm(`Switch storage mode to ${targetMode.toUpperCase()}? Your current data will be migrated to the target storage.`);
+            if (!confirmed) return;
 
             try {
                 const targetAdapter = await createStorageAdapter(
                     targetMode,
-                    db,
+                    getFirestoreDb(),
                     () => window.state.user?.uid || 'local_user'
                 );
 

@@ -1,7 +1,34 @@
 import { StorageAdapter } from './StorageAdapter.js';
 import { 
     collection, addDoc, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot, query, orderBy, runTransaction, enableIndexedDbPersistence
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+} from "firebase/firestore";
+
+const RETRY_MAX = 3;
+const RETRY_BASE_MS = 1000;
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function retryWithBackoff(fn, context = '') {
+    let lastError;
+    for (let attempt = 0; attempt < RETRY_MAX; attempt++) {
+        try {
+            return await fn();
+        } catch (err) {
+            lastError = err;
+            if (err.code === 'unavailable' || err.code === 'deadline-exceeded' || err.code === 'resource-exhausted') {
+                const delay = RETRY_BASE_MS * Math.pow(2, attempt);
+                console.warn(`[FB-ADAPTER] ${context} failed (attempt ${attempt + 1}/${RETRY_MAX}), retrying in ${delay}ms:`, err.message);
+                await sleep(delay);
+            } else {
+                break;
+            }
+        }
+    }
+    console.error(`[FB-ADAPTER] ${context} failed after ${RETRY_MAX} attempts:`, lastError?.message || lastError);
+    throw lastError;
+}
 
 export class FirebaseAdapter extends StorageAdapter {
     constructor(db, getUidFn) {
@@ -67,21 +94,27 @@ export class FirebaseAdapter extends StorageAdapter {
     }
 
     async createItem(itemData) {
-        const docRef = await addDoc(this._getUserColRef('items'), {
-            ...itemData,
-            createdAt: itemData.createdAt || Date.now()
-        });
-        return { id: docRef.id, ...itemData };
+        return retryWithBackoff(async () => {
+            const docRef = await addDoc(this._getUserColRef('items'), {
+                ...itemData,
+                createdAt: itemData.createdAt || Date.now()
+            });
+            return { id: docRef.id, ...itemData };
+        }, 'createItem');
     }
 
     async updateItem(id, itemData) {
-        await updateDoc(this._getUserDocRef('items', id), itemData);
-        return { id, ...itemData };
+        return retryWithBackoff(async () => {
+            await updateDoc(this._getUserDocRef('items', id), itemData);
+            return { id, ...itemData };
+        }, 'updateItem');
     }
 
     async deleteItem(id) {
-        await deleteDoc(this._getUserDocRef('items', id));
-        return id;
+        return retryWithBackoff(async () => {
+            await deleteDoc(this._getUserDocRef('items', id));
+            return id;
+        }, 'deleteItem');
     }
 
     // --- Logs ---
@@ -92,16 +125,20 @@ export class FirebaseAdapter extends StorageAdapter {
     }
 
     async createLog(logData) {
-        const docRef = await addDoc(this._getUserColRef('logs'), {
-            ...logData,
-            timestamp: logData.timestamp || Date.now()
-        });
-        return { id: docRef.id, ...logData };
+        return retryWithBackoff(async () => {
+            const docRef = await addDoc(this._getUserColRef('logs'), {
+                ...logData,
+                timestamp: logData.timestamp || Date.now()
+            });
+            return { id: docRef.id, ...logData };
+        }, 'createLog');
     }
 
     async deleteLog(id) {
-        await deleteDoc(this._getUserDocRef('logs', id));
-        return id;
+        return retryWithBackoff(async () => {
+            await deleteDoc(this._getUserDocRef('logs', id));
+            return id;
+        }, 'deleteLog');
     }
 
     // --- Notes ---
@@ -111,25 +148,29 @@ export class FirebaseAdapter extends StorageAdapter {
     }
 
     async upsertNote(noteData) {
-        let noteId = noteData.id;
-        if (!noteId) {
-            const docRef = doc(this._getUserColRef('notes'));
-            noteId = docRef.id;
-        }
-        const ref = this._getUserDocRef('notes', noteId);
-        const payload = {
-            title: noteData.title || '',
-            body: noteData.body || '',
-            updatedAt: Date.now(),
-            ...(noteData.createdAt ? { createdAt: noteData.createdAt } : { createdAt: Date.now() })
-        };
-        await setDoc(ref, payload, { merge: true });
-        return { id: noteId, ...payload };
+        return retryWithBackoff(async () => {
+            let noteId = noteData.id;
+            if (!noteId) {
+                const docRef = doc(this._getUserColRef('notes'));
+                noteId = docRef.id;
+            }
+            const ref = this._getUserDocRef('notes', noteId);
+            const payload = {
+                title: noteData.title || '',
+                body: noteData.body || '',
+                updatedAt: Date.now(),
+                ...(noteData.createdAt ? { createdAt: noteData.createdAt } : { createdAt: Date.now() })
+            };
+            await setDoc(ref, payload, { merge: true });
+            return { id: noteId, ...payload };
+        }, 'upsertNote');
     }
 
     async deleteNote(id) {
-        await deleteDoc(this._getUserDocRef('notes', id));
-        return id;
+        return retryWithBackoff(async () => {
+            await deleteDoc(this._getUserDocRef('notes', id));
+            return id;
+        }, 'deleteNote');
     }
 
     // --- Seasons ---
@@ -139,21 +180,27 @@ export class FirebaseAdapter extends StorageAdapter {
     }
 
     async createSeason(seasonData) {
-        const docRef = await addDoc(this._getUserColRef('seasons'), {
-            ...seasonData,
-            createdAt: Date.now()
-        });
-        return { id: docRef.id, ...seasonData };
+        return retryWithBackoff(async () => {
+            const docRef = await addDoc(this._getUserColRef('seasons'), {
+                ...seasonData,
+                createdAt: Date.now()
+            });
+            return { id: docRef.id, ...seasonData };
+        }, 'createSeason');
     }
 
     async updateSeason(id, seasonData) {
-        await updateDoc(this._getUserDocRef('seasons', id), seasonData);
-        return { id, ...seasonData };
+        return retryWithBackoff(async () => {
+            await updateDoc(this._getUserDocRef('seasons', id), seasonData);
+            return { id, ...seasonData };
+        }, 'updateSeason');
     }
 
     async deleteSeason(id) {
-        await deleteDoc(this._getUserDocRef('seasons', id));
-        return id;
+        return retryWithBackoff(async () => {
+            await deleteDoc(this._getUserDocRef('seasons', id));
+            return id;
+        }, 'deleteSeason');
     }
 
     // --- Backlog ---
@@ -163,16 +210,20 @@ export class FirebaseAdapter extends StorageAdapter {
     }
 
     async createBacklogEntry(entryData) {
-        const docRef = await addDoc(this._getUserColRef('backlog'), {
-            ...entryData,
-            createdAt: Date.now()
-        });
-        return { id: docRef.id, ...entryData };
+        return retryWithBackoff(async () => {
+            const docRef = await addDoc(this._getUserColRef('backlog'), {
+                ...entryData,
+                createdAt: Date.now()
+            });
+            return { id: docRef.id, ...entryData };
+        }, 'createBacklogEntry');
     }
 
     async deleteBacklogEntry(id) {
-        await deleteDoc(this._getUserDocRef('backlog', id));
-        return id;
+        return retryWithBackoff(async () => {
+            await deleteDoc(this._getUserDocRef('backlog', id));
+            return id;
+        }, 'deleteBacklogEntry');
     }
 
     // --- Daily Logs ---
@@ -182,10 +233,12 @@ export class FirebaseAdapter extends StorageAdapter {
     }
 
     async upsertDailyLog(dailyLogData) {
-        let docId = dailyLogData.id || dailyLogData.date;
-        const ref = this._getUserDocRef('dailyLogs', docId);
-        await setDoc(ref, dailyLogData, { merge: true });
-        return { id: docId, ...dailyLogData };
+        return retryWithBackoff(async () => {
+            let docId = dailyLogData.id || dailyLogData.date;
+            const ref = this._getUserDocRef('dailyLogs', docId);
+            await setDoc(ref, dailyLogData, { merge: true });
+            return { id: docId, ...dailyLogData };
+        }, 'upsertDailyLog');
     }
 
     // --- Habit Logs ---
@@ -195,10 +248,12 @@ export class FirebaseAdapter extends StorageAdapter {
     }
 
     async upsertHabitLog(habitLogData) {
-        let docId = habitLogData.id || `${habitLogData.seasonId}_${habitLogData.date}`;
-        const ref = this._getUserDocRef('habitLogs', docId);
-        await setDoc(ref, habitLogData, { merge: true });
-        return { id: docId, ...habitLogData };
+        return retryWithBackoff(async () => {
+            let docId = habitLogData.id || `${habitLogData.seasonId}_${habitLogData.date}`;
+            const ref = this._getUserDocRef('habitLogs', docId);
+            await setDoc(ref, habitLogData, { merge: true });
+            return { id: docId, ...habitLogData };
+        }, 'upsertHabitLog');
     }
 
     // --- Meta / Profile / Active Timer ---
@@ -209,30 +264,36 @@ export class FirebaseAdapter extends StorageAdapter {
     }
 
     async setMeta(metaId, metaData) {
-        const ref = this._getUserDocRef('meta', metaId);
-        await setDoc(ref, metaData, { merge: true });
-        return { id: metaId, ...metaData };
+        return retryWithBackoff(async () => {
+            const ref = this._getUserDocRef('meta', metaId);
+            await setDoc(ref, metaData, { merge: true });
+            return { id: metaId, ...metaData };
+        }, 'setMeta');
     }
 
     // --- Atomic Start Timer with ActiveTimer Meta ---
     async startItemTimer(itemId, startedAt) {
-        const activeTimerRef = this._getUserDocRef('meta', 'activeTimer');
-        const itemRef = this._getUserDocRef('items', itemId);
+        return retryWithBackoff(async () => {
+            const activeTimerRef = this._getUserDocRef('meta', 'activeTimer');
+            const itemRef = this._getUserDocRef('items', itemId);
 
-        await runTransaction(this.db, async (transaction) => {
-            transaction.set(activeTimerRef, { itemId, startedAt });
-            transaction.update(itemRef, { isRunning: true, startedAt });
-        });
+            await runTransaction(this.db, async (transaction) => {
+                transaction.set(activeTimerRef, { itemId, startedAt });
+                transaction.update(itemRef, { isRunning: true, startedAt });
+            });
+        }, 'startItemTimer');
     }
 
     async stopItemTimer(itemId, newAccumulatedSeconds) {
-        const activeTimerRef = this._getUserDocRef('meta', 'activeTimer');
-        const itemRef = this._getUserDocRef('items', itemId);
+        return retryWithBackoff(async () => {
+            const activeTimerRef = this._getUserDocRef('meta', 'activeTimer');
+            const itemRef = this._getUserDocRef('items', itemId);
 
-        await runTransaction(this.db, async (transaction) => {
-            transaction.set(activeTimerRef, { itemId: null, startedAt: null });
-            transaction.update(itemRef, { isRunning: false, startedAt: null, accumulatedSeconds: newAccumulatedSeconds });
-        });
+            await runTransaction(this.db, async (transaction) => {
+                transaction.set(activeTimerRef, { itemId: null, startedAt: null });
+                transaction.update(itemRef, { isRunning: false, startedAt: null, accumulatedSeconds: newAccumulatedSeconds });
+            });
+        }, 'stopItemTimer');
     }
 
     // --- Realtime / Event Subscriptions ---
