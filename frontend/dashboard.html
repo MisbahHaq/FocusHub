@@ -143,39 +143,27 @@
 
         <main class="flex-1 overflow-y-auto p-6 lg:p-10 flex flex-col gap-8">
             
-            <header class="flex flex-wrap items-center gap-3 bg-white dark:bg-zinc-900 rounded-xl p-4 border border-zinc-200 dark:border-zinc-700">
-                <div class="flex items-center gap-3 pl-2 flex-1 min-w-0">
-                    <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Habits & Topics Explorer</h1>
-                </div>
-                <div class="flex items-center gap-2">
-                    <input type="text" id="searchInput" placeholder="Search items..." oninput="filterItems()" class="w-40 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-600 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-100 text-zinc-900 dark:text-zinc-100">
-                    <div id="syncStatusIndicator" class="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-semibold" title="Data Sync Status">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span id="syncStatusText">Online</span>
-                    </div>
-
-                    <button onclick="handleExportData()" class="p-2.5 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-xl text-gray-600 dark:text-zinc-300 transition flex items-center gap-1.5 text-xs font-semibold" title="Export Data (JSON/CSV)">
-                        <i data-lucide="download" class="w-4 h-4"></i> Export
+            <header class="flex items-center gap-2 bg-white dark:bg-zinc-900 rounded-xl px-4 py-3 border border-zinc-200 dark:border-zinc-700">
+                <h1 class="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex-1 min-w-0 truncate">Focus Synergy</h1>
+                <div class="flex items-center gap-1.5">
+                    <button onclick="handleExportData()" class="p-2 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-lg text-gray-500 dark:text-zinc-400 transition" title="Export Data">
+                        <i data-lucide="download" class="w-4 h-4"></i>
                     </button>
-
-                    <button onclick="handleImportData()" class="p-2.5 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-xl text-gray-600 dark:text-zinc-300 transition flex items-center gap-1.5 text-xs font-semibold" title="Import Data (JSON)">
-                        <i data-lucide="upload" class="w-4 h-4"></i> Import
+                    <button onclick="handleImportData()" class="p-2 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-lg text-gray-500 dark:text-zinc-400 transition" title="Import Data">
+                        <i data-lucide="upload" class="w-4 h-4"></i>
                     </button>
-
                     <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="processImportFile(event)">
-
-                    <button onclick="openAppSettingsModal()" class="p-2.5 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-xl text-gray-600 dark:text-zinc-300 transition" title="Settings">
+                    <button onclick="openAppSettingsModal()" class="p-2 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-lg text-gray-500 dark:text-zinc-400 transition" title="Settings">
                         <i data-lucide="settings" class="w-4 h-4"></i>
                     </button>
-
-                    <button onclick="toggleTheme()" id="themeToggle" class="p-2.5 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-xl text-gray-600 dark:text-zinc-300 transition relative" title="Cycle theme" aria-label="Toggle theme">
+                    <button onclick="toggleTheme()" id="themeToggle" class="p-2 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-lg text-gray-500 dark:text-zinc-400 transition relative" title="Cycle theme">
                         <i data-lucide="sun" class="w-4 h-4 dark-icon hidden"></i>
                         <i data-lucide="music" class="w-4 h-4 midnight-icon hidden"></i>
                         <i data-lucide="moon" class="w-4 h-4 light-icon"></i>
                     </button>
-                    <div class="flex items-center gap-2 border-l border-gray-200 dark:border-zinc-600 pl-4">
-                         <div id="userDisplay" class="flex items-center gap-2 text-zinc-900 dark:text-zinc-100"></div>
-                     </div>
+                    <div class="flex items-center gap-2 border-l border-gray-200 dark:border-zinc-600 pl-3 ml-0.5">
+                        <span id="userDisplay" class="text-xs font-medium text-zinc-600 dark:text-zinc-400 truncate max-w-[120px]"></span>
+                    </div>
                 </div>
             </header>
 
@@ -525,7 +513,6 @@
 
         // Pre-register critical globals so inline event handlers (onclick, oninput)
         // always find a function, even if the module fails partway through.
-        window.filterItems = window.filterItems || filterItems;
         window.switchTab = window.switchTab || switchTab;
         window.showTab = window.showTab || showTab;
 
@@ -588,23 +575,6 @@
         });
 
         // Online / Offline network status listener
-        window.addEventListener('online', () => updateOnlineStatus(true));
-        window.addEventListener('offline', () => updateOnlineStatus(false));
-
-        function updateOnlineStatus(isOnline) {
-            const statusDot = document.getElementById('syncStatusIndicator');
-            const statusText = document.getElementById('syncStatusText');
-            if (statusDot && statusText) {
-                if (isOnline) {
-                    statusDot.className = 'flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-semibold';
-                    statusText.innerText = 'Online';
-                } else {
-                    statusDot.className = 'flex items-center gap-1.5 px-2.5 py-1 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-full text-xs font-semibold';
-                    statusText.innerText = 'Offline';
-                }
-            }
-        }
-
         window.selectStorageMode = function(mode) {
             window.state.storageMode = mode;
             setStorageMode(mode);
@@ -829,7 +799,6 @@
             applySavedTheme();
             showTab('loginTab');
             saveButtonOriginals();
-            updateOnlineStatus(navigator.onLine);
 
             const initialMode = getStorageMode();
             window.selectStorageMode(initialMode);
@@ -2032,10 +2001,6 @@
             lucide.createIcons();
         }
 
-        function filterItems() {
-            renderDashboard();
-        }
-
         window.togglePin = async function(id) {
             const item = window.state.items.find(i => i.id === id);
             if (!item || !window.storageAdapter) return;
@@ -2044,29 +2009,19 @@
             renderDashboard();
         };
 
-        window.filterItems = function() {
-            renderDashboard();
-        };
-
         function renderDashboard() {
             const container = document.getElementById('unifiedItemsList');
             if(!container) return;
             container.innerHTML = '';
-
-            const query = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
 
             let totalTopicSec = 0;
             let totalHabitSec = 0;
 
             const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-            const filteredItems = query
-                ? window.state.items.filter(i => i.name.toLowerCase().includes(query))
-                : window.state.items;
+            window.state.items.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
 
-            filteredItems.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
-
-            filteredItems.forEach(item => {
+            window.state.items.forEach(item => {
                 const historicalSeconds = window.state.logs
                     .filter(l => l.itemId === item.id && new Date(l.timestamp) >= monthStart)
                     .reduce((acc, curr) => acc + curr.seconds, 0);
@@ -2101,18 +2056,17 @@
                 `;
             }
 
-            if (filteredItems.length === 0) {
-                const msg = query ? `No items matching "${query}".` : 'No items yet. Add one above.';
-                container.innerHTML = `<div class="p-8 text-center text-xs text-zinc-400 dark:text-zinc-500 italic">${msg}</div>`;
-                document.getElementById('statsSubHeader').innerText = query ? `0 of ${window.state.items.length} items match.` : "No items tracked.";
+            if (window.state.items.length === 0) {
+                container.innerHTML = '<div class="p-8 text-center text-xs text-zinc-400 dark:text-zinc-500 italic">No items yet. Add one above.</div>';
+                document.getElementById('statsSubHeader').innerText = "No items tracked.";
                 syncActiveMonitorPanel();
                 lucide.createIcons();
                 return;
             }
 
-            document.getElementById('statsSubHeader').innerText = `${filteredItems.length} of ${window.state.items.length} item${window.state.items.length !== 1 ? 's' : ''} tracked.`;
+            document.getElementById('statsSubHeader').innerText = `${window.state.items.length} item${window.state.items.length !== 1 ? 's' : ''} tracked.`;
 
-            filteredItems.forEach(item => {
+            window.state.items.forEach(item => {
                 const historicalSeconds = window.state.logs.filter(l => l.itemId === item.id).reduce((acc, curr) => acc + curr.seconds, 0);
                 const isSelected = window.state.selectedItemId === item.id;
                 
