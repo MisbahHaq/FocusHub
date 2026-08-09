@@ -12,7 +12,7 @@
     "tauri": "tauri",
     "dev": "vite dev",
     "dev:tauri": "tauri dev",
-    "build": "node scripts/build-frontend.cjs; if ($LASTEXITCODE -eq 0) { vite build; if ($LASTEXITCODE -eq 0) { copy /Y frontend\\env.js frontend\\dist\\env.js 2>$null } }",
+    "build": "node scripts/build-runner.cjs",
     "build:tauri": "tauri build",
     "build:env": "node scripts/build-frontend.cjs",
     "preview": "vite preview",
