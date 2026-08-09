@@ -128,7 +128,7 @@ export class FirebaseAdapter extends StorageAdapter {
         return retryWithBackoff(async () => {
             const docRef = await addDoc(this._getUserColRef('logs'), {
                 ...logData,
-                timestamp: logData.timestamp || Date.now()
+                timestamp: logData.timestamp ? new Date(logData.timestamp).toISOString() : new Date().toISOString()
             });
             return { id: docRef.id, ...logData };
         }, 'createLog');

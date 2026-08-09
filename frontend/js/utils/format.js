@@ -1,3 +1,11 @@
+export function getLocalDateStr(timestamp) {
+    const d = new Date(timestamp);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 export function formatTimeHMS(totalSeconds) {
     const hrs = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
     const mins = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');

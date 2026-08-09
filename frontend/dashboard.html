@@ -10,7 +10,7 @@
     <title>Focus Synergy - Habits, Topics & Analytics</title>
     <meta name="description" content="Focus Synergy helps you track habits, topics, and deep work sessions with timers, analytics, activity calendars, and notes.">
     <meta name="keywords" content="time tracker, habit tracker, focus, deep work, productivity, analytics, time management, pomodoro">
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="bg-zinc-50 text-zinc-900 font-sans min-h-screen selection:bg-zinc-200 dark:selection:bg-zinc-700 dark:bg-[#0a0a0a] dark:text-zinc-100 midnight:bg-[#111318] midnight:text-[#b8b5c0] midnight:selection:bg-[#2a2633]">
 
@@ -23,34 +23,9 @@
                 <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Focus Synergy</h1>
             </div>
             
-            <div class="mb-4 bg-zinc-100 dark:bg-zinc-800/80 p-2.5 rounded-xl text-xs space-y-2 border border-zinc-200 dark:border-zinc-700">
-                <div class="font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 text-[10px] flex justify-between items-center">
-                    <span>Data Storage Mode</span>
-                    <span id="currentStorageModeBadge" class="bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 px-1.5 py-0.5 rounded font-mono">Cloud</span>
-                </div>
-                <div class="flex gap-2">
-                    <button id="mode-btn-cloud" onclick="selectStorageMode('cloud')" class="flex-1 py-1.5 px-2 rounded-lg font-semibold border flex items-center justify-center gap-1.5 transition bg-white dark:bg-zinc-700 border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-zinc-100 shadow-xs">
-                        <i data-lucide="cloud" class="w-3.5 h-3.5"></i> Cloud Sync
-                    </button>
-                    <button id="mode-btn-local" onclick="selectStorageMode('local')" class="flex-1 py-1.5 px-2 rounded-lg font-semibold border flex items-center justify-center gap-1.5 transition bg-transparent border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
-                        <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i> Local Only
-                    </button>
-                </div>
-                <div id="local-mode-warning" class="hidden text-[11px] text-amber-600 dark:text-amber-400 leading-tight pt-1 border-t border-zinc-200 dark:border-zinc-700/60">
-                    Local mode keeps data on this device only. It is not encrypted at rest beyond your OS's disk protections, and is not backed up automatically â€” use Export for backups.
-                </div>
-            </div>
-
             <div class="flex gap-2 mb-6 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
                 <button onclick="showTab('loginTab')" id="btn-login-tab" class="flex-1 py-2 rounded-md bg-white dark:bg-zinc-700 font-semibold text-sm text-zinc-900 dark:text-zinc-100">Login</button>
                 <button onclick="showTab('registerTab')" id="btn-register-tab" class="flex-1 py-2 rounded-md text-zinc-500 dark:text-zinc-400 font-semibold text-sm">Register</button>
-            </div>
-
-            <div id="localLoginOption" class="hidden mb-4">
-                <button onclick="enterLocalMode()" id="btn-local" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2 transition shadow-sm">
-                    <span id="local-spinner" class="spinner hidden"></span>
-                    <span id="local-text">Enter Workspace (Local Mode)</span>
-                </button>
             </div>
 
             <div id="loginTab">

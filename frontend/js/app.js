@@ -1,19 +1,21 @@
 ﻿
+import '../css/styles.css';
+
 import { initializeApp, getApps } from "firebase/app";
 import { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 import { getAuth, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, updateProfile } from "firebase/auth";
-import * as lucide from 'lucide';
+import { createIcons, icons } from 'lucide';
 
-import { createStorageAdapter, getStorageMode, setStorageMode, migrateStorageData } from './storage/index.js';
+import { createStorageAdapter } from './storage/index.js';
         import { exportAllData } from './modules/export.js';
         import { checkBreakReminder, resetTimerNotificationState } from './modules/notifications.js';
         import { calculateSeasonRetrospective, renderRetrospectiveModal } from './modules/retrospective.js';
         import { startOnboardingTour } from './modules/onboarding.js';
         import { isTauriEnv } from './utils/tauri.js';
         import { escapeHtml } from './utils/sanitize.js';
-        import { formatTimeHMS, formatHoursAndMins, formatDateRange } from './utils/format.js';
+        import { formatTimeHMS, formatHoursAndMins, formatDateRange, getLocalDateStr } from './utils/format.js';
         import { showToast, playSound } from './utils/ui.js';
-        import { toggleTheme, applySavedTheme } from './utils/theme.js';
+        import { toggleTheme, applySavedTheme, applyTheme, updateThemeIcon } from './utils/theme.js';
 import { createStore, subscribe, showError, showConfirm } from './utils/state.js';
 
         const GOOGLE_USE_REDIRECT = typeof window !== "undefined" && !!window.__TAURI_INTERNALS__;
@@ -67,7 +69,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
             backlogOpen: false,
             breakNotificationsEnabled: true,
             breakThresholdMinutes: 50,
-            storageMode: getStorageMode()
+            storageMode: 'cloud'
         });
 
         // Pre-register critical globals so inline event handlers (onclick, oninput)
@@ -133,59 +135,16 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
             processingEngineCycle();
         });
 
-        // Online / Offline network status listener
-        window.selectStorageMode = function(mode) {
-            window.state.storageMode = mode;
-            setStorageMode(mode);
-            
-            const badge = document.getElementById('currentStorageModeBadge');
-            const warning = document.getElementById('local-mode-warning');
-            const localLogin = document.getElementById('localLoginOption');
-            const loginTab = document.getElementById('loginTab');
-            const registerTab = document.getElementById('registerTab');
-            const cloudBtn = document.getElementById('mode-btn-cloud');
-            const localBtn = document.getElementById('mode-btn-local');
-
-            if (mode === 'local') {
-                if (badge) badge.innerText = 'Local';
-                if (warning) warning.classList.remove('hidden');
-                if (localLogin) localLogin.classList.remove('hidden');
-                if (loginTab) loginTab.classList.add('hidden');
-                if (registerTab) registerTab.classList.add('hidden');
-
-                if (cloudBtn) cloudBtn.className = 'flex-1 py-1.5 px-2 rounded-lg font-semibold border flex items-center justify-center gap-1.5 transition bg-transparent border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100';
-                if (localBtn) localBtn.className = 'flex-1 py-1.5 px-2 rounded-lg font-semibold border flex items-center justify-center gap-1.5 transition bg-white dark:bg-zinc-700 border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-zinc-100 shadow-xs';
-            } else {
-                if (badge) badge.innerText = 'Cloud';
-                if (warning) warning.classList.add('hidden');
-                if (localLogin) localLogin.classList.add('hidden');
-                if (loginTab) loginTab.classList.remove('hidden');
-
-                if (cloudBtn) cloudBtn.className = 'flex-1 py-1.5 px-2 rounded-lg font-semibold border flex items-center justify-center gap-1.5 transition bg-white dark:bg-zinc-700 border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-zinc-100 shadow-xs';
-                if (localBtn) localBtn.className = 'flex-1 py-1.5 px-2 rounded-lg font-semibold border flex items-center justify-center gap-1.5 transition bg-transparent border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100';
-            }
-        };
-
-        window.enterLocalMode = async function() {
-            setAuthLoading(true);
-            window._pendingLoginAnimation = true;
-            setStorageMode('local');
-            window.state.storageMode = 'local';
-            const dummyUser = { uid: 'local_user', displayName: 'Local Device User', email: 'local@device' };
-            await bootWorkspaceForUser(dummyUser);
-        };
-
         async function bootWorkspaceForUser(user, animate = false) {
             try {
                 window.state.user = user;
                 const userDisplay = document.getElementById('userDisplay');
 
-            const isLocal = window.state.storageMode === 'local';
-            userDisplay.innerHTML = `<span class="text-xs font-semibold">${escapeHtml(user.displayName || user.email)} ${isLocal ? '(Local)' : ''}</span> <button onclick="logout()" class="ml-2 text-red-400 dark:text-red-500 hover:text-red-300 text-xs underline">Exit</button>`;
+                userDisplay.innerHTML = `<span class="text-xs font-semibold">${escapeHtml(user.displayName || user.email)}</span> <button onclick="logout()" class="ml-2 text-red-400 dark:text-red-500 hover:text-red-300 text-xs underline">Exit</button>`;
             // Initialize StorageAdapter
             try {
                 window.storageAdapter = await createStorageAdapter(
-                    window.state.storageMode,
+                    'cloud',
                     getFirestoreDb(),
                     () => window.state.user?.uid
                 );
@@ -214,7 +173,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
 
             // 1. Subscribe to Items
             const unsubItems = window.storageAdapter.subscribe('items', (data) => {
-                const userItems = isLocal ? data : data.filter(item => item.userId === user.uid);
+                const userItems = data.filter(item => item.userId === user.uid);
                 window.state.items = userItems.map(item => ({
                     ...item,
                     isRunning: item.isRunning || false,
@@ -230,7 +189,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
             unsubscribers.push(unsubItems);
             // 2. Subscribe to Logs
             const unsubLogs = window.storageAdapter.subscribe('logs', (data) => {
-                window.state.logs = isLocal ? data : data.filter(log => log.userId === user.uid);
+                window.state.logs = data.filter(log => log.userId === user.uid);
                 scheduleRender('dashboard', renderDashboard);
                 scheduleRender('analytics', renderAnalyticsViews);
                 scheduleRender('calendar', renderCalendarViews);
@@ -238,7 +197,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
             unsubscribers.push(unsubLogs);
             // 3. Subscribe to Notes
             const unsubNotes = window.storageAdapter.subscribe('notes', (data) => {
-                window.state.notes = isLocal ? data : data.filter(n => n.userId === user.uid);
+                window.state.notes = data.filter(n => n.userId === user.uid);
                 scheduleRender('notes', renderNotesList);
                 refreshQuickNotesSidebar();
             });
@@ -246,34 +205,34 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
 
             // 4. Subscribe to Seasons
             const unsubSeasons = window.storageAdapter.subscribe('seasons', (data) => {
-                window.state.seasons = isLocal ? data : data.filter(s => s.userId === user.uid);
+                window.state.seasons = data.filter(s => s.userId === user.uid);
                 scheduleRender('seasons', renderSeasonsView);
             });
             unsubscribers.push(unsubSeasons);
             // 5. Subscribe to Backlog
             const unsubBacklog = window.storageAdapter.subscribe('backlog', (data) => {
-                window.state.backlog = isLocal ? data : data.filter(b => b.userId === user.uid);
+                window.state.backlog = data.filter(b => b.userId === user.uid);
                 scheduleRender('seasons', renderSeasonsView);
             });
             unsubscribers.push(unsubBacklog);
             // 6. Subscribe to Daily Logs
             const unsubDaily = window.storageAdapter.subscribe('dailyLogs', (data) => {
-                window.state.dailyLogs = isLocal ? data : data.filter(d => d.userId === user.uid);
+                window.state.dailyLogs = data.filter(d => d.userId === user.uid);
                 scheduleRender('seasons', renderSeasonsView);
             });
             unsubscribers.push(unsubDaily);
             // 7. Subscribe to Habit Logs
             const unsubHabit = window.storageAdapter.subscribe('habitLogs', (data) => {
-                window.state.habitLogs = isLocal ? data : data.filter(h => h.userId === user.uid);
+                window.state.habitLogs = data.filter(h => h.userId === user.uid);
                 scheduleRender('seasons', renderSeasonsView);
             });
             unsubscribers.push(unsubHabit);
             // 8. Subscribe to Meta ActiveTimer (Multi-Device Single Active Timer Invariant)
             const unsubActiveTimer = window.storageAdapter.subscribe('meta/activeTimer', (activeTimerDoc) => {
-                if (window.state.storageMode !== 'cloud' || !activeTimerDoc) return;
-                const localRunningItem = window.state.items.find(i => i.isRunning);
-                if (localRunningItem && activeTimerDoc.itemId && activeTimerDoc.itemId !== localRunningItem.id) {
-                    localRunningItem.isRunning = false;
+                if (!activeTimerDoc) return;
+                const runningItem = window.state.items.find(i => i.isRunning);
+                if (runningItem && activeTimerDoc.itemId && activeTimerDoc.itemId !== runningItem.id) {
+                    runningItem.isRunning = false;
                     renderDashboard();
                     window.showToast("Timer moved to another device.", "warning");
                 }
@@ -354,18 +313,14 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
+            createIcons({icons});
             applySavedTheme();
             showTab('loginTab');
             saveButtonOriginals();
 
-            const initialMode = getStorageMode();
-            window.selectStorageMode(initialMode);
             if (getAuthInstance()) {
                 onAuthStateChanged(getAuthInstance(), async (user) => {
-                    const currentMode = window.state.storageMode || getStorageMode();
-                    window.state.storageMode = currentMode;
-                    if (user && currentMode === 'cloud') {
+                    if (user) {
                         if (bootInProgress) {
                             return;
                         }
@@ -379,21 +334,9 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
                             console.error('[AUTH] bootWorkspaceForUser threw:', err);
                         }
                         bootInProgress = false;
-                    } else if (currentMode !== 'local') {
+                    } else {
                         document.getElementById('loginScreen').classList.remove('hidden');
                         document.getElementById('mainApp').classList.add('hidden');
-                    } else {
-                        if (bootInProgress) {
-                            return;
-                        }
-                        bootInProgress = true;
-                        const dummyUser = { uid: 'local_user', displayName: 'Local Device User', email: 'local@device' };
-                        try {
-                            await bootWorkspaceForUser(dummyUser, false);
-                        } catch (err) {
-                            console.error('[AUTH] local bootWorkspaceForUser threw:', err);
-                        }
-                        bootInProgress = false;
                     }
                 });
             }
@@ -426,8 +369,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
             const map = [
                 ['btn-login', 'login-spinner', 'login-text', 'Signing in...'],
                 ['btn-register', 'register-spinner', 'register-text', 'Creating account...'],
-                ['btn-google', 'google-spinner', 'google-text', 'Connecting...'],
-                ['btn-local', 'local-spinner', 'local-text', 'Loading workspace...']
+                ['btn-google', 'google-spinner', 'google-text', 'Connecting...']
             ];
             map.forEach(([btnId, spinnerId, textId, loadingText]) => {
                 const btn = document.getElementById(btnId);
@@ -444,8 +386,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
             const map = [
                 ['login-text', 'Sign In'],
                 ['register-text', 'Create Account'],
-                ['google-text', 'Continue with Google'],
-                ['local-text', 'Enter Workspace (Local Mode)']
+                ['google-text', 'Continue with Google']
             ];
             map.forEach(([id, original]) => {
                 const el = document.getElementById(id);
@@ -506,7 +447,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
                 backlogOpen: false,
                 breakNotificationsEnabled: true,
                 breakThresholdMinutes: 50,
-                storageMode: window.state.storageMode
+                storageMode: 'cloud'
             });
             const authInst = getAuthInstance();
             if (authInst) await signOut(authInst);
@@ -794,7 +735,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
                 </div>
             `;
             document.body.appendChild(modal);
-            lucide.createIcons();
+            createIcons({icons});
 
             setTimeout(() => document.getElementById('newSeasonTitle')?.focus(), 100);
         };
@@ -980,7 +921,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
             const div = document.createElement('div');
             div.innerHTML = html;
             document.body.appendChild(div.firstElementChild);
-            lucide.createIcons();
+            createIcons({icons});
         };
 
         window.closeRetroModal = function() {
@@ -1052,7 +993,6 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
             const existing = document.getElementById('appSettingsModalOverlay');
             if (existing) existing.remove();
 
-            const isLocal = window.state.storageMode === 'local';
             const modal = document.createElement('div');
             modal.id = 'appSettingsModalOverlay';
             modal.className = 'fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 tab-enter';
@@ -1068,19 +1008,6 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
                     </div>
 
                     <div class="space-y-4 text-xs">
-                        <div class="space-y-1.5">
-                            <label class="font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">Active Storage Mode</label>
-                            <div class="flex justify-between items-center bg-zinc-100 dark:bg-zinc-800 p-3 rounded-xl">
-                                <div>
-                                    <span class="font-bold text-sm text-zinc-900 dark:text-zinc-100">${isLocal ? 'Local Mode (This Device)' : 'Cloud Mode (Firebase)'}</span>
-                                    <p class="text-zinc-400 text-[11px]">${isLocal ? 'Data stored locally in IndexedDB' : 'Data synced across devices via Firestore'}</p>
-                                </div>
-                                <button onclick="switchStorageModeInSettings()" class="px-3 py-1.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-lg hover:opacity-90 transition">
-                                    Migrate Data
-                                </button>
-                            </div>
-                        </div>
-
                         <div class="space-y-1.5 border-t border-zinc-100 dark:border-zinc-800 pt-3">
                             <label class="font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">Break Reminder Notifications</label>
                             <div class="flex items-center justify-between bg-zinc-100 dark:bg-zinc-800 p-3 rounded-xl">
@@ -1115,7 +1042,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
                 </div>
             `;
             document.body.appendChild(modal);
-            lucide.createIcons();
+            createIcons({icons});
         };
 
         window.closeAppSettingsModal = function() {
@@ -1125,31 +1052,6 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
 
         window.replayTutorialTour = function() {
             startOnboardingTour();
-        };
-
-        window.switchStorageModeInSettings = async function() {
-            const targetMode = window.state.storageMode === 'cloud' ? 'local' : 'cloud';
-            const confirmed = await showConfirm(`Switch storage mode to ${targetMode.toUpperCase()}? Your current data will be migrated to the target storage.`);
-            if (!confirmed) return;
-
-            try {
-                const targetAdapter = await createStorageAdapter(
-                    targetMode,
-                    getFirestoreDb(),
-                    () => window.state.user?.uid || 'local_user'
-                );
-
-                const report = await migrateStorageData(window.storageAdapter, targetAdapter);
-                setStorageMode(targetMode);
-                window.state.storageMode = targetMode;
-
-                window.closeAppSettingsModal();
-                window.showToast(`Migrated data to ${targetMode.toUpperCase()} mode! Reloading workspace...`);
-                setTimeout(() => location.reload(), 1500);
-            } catch(e) {
-                console.error("Migration error:", e);
-                window.showToast("Migration failed", "warning");
-            }
         };
 
         window.setEnergyMode = function(mode) {
@@ -1173,7 +1075,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
                     seasonId: active ? active.id : 'general',
                     userId: window.state.user.uid,
                     timestamp: new Date().toISOString(),
-                    date: new Date().toISOString().split('T')[0]
+                    date: getLocalDateStr(new Date())
                 });
                 input.value = '';
             } catch(e) {
@@ -1197,7 +1099,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
             const active = getActiveSeason();
             if (!active) return;
 
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateStr(new Date());
             const existingLog = window.state.habitLogs.find(h => h.date === today && h.seasonId === active.id);
 
             if (existingLog) {
@@ -1281,7 +1183,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
         function getHabitStatus(type) {
             const active = getActiveSeason();
             if (!active) return { completed: false, done: false };
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateStr(new Date());
             const log = window.state.habitLogs.find(h => h.date === today && h.seasonId === active.id && h.userId === window.state.user.uid);
             return { completed: !!log, done: type === 'dev' ? (log ? log.devCompleted : false) : (log ? log.personalCompleted : false) };
         }
@@ -1352,7 +1254,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
                     </div>
                 `;
             }).join('');
-            lucide.createIcons();
+            createIcons({icons});
         }
 
         function renderSeasonDetail() {
@@ -1392,7 +1294,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
                 energyLogSection.classList.toggle('hidden', !activeSeason);
             }
 
-            lucide.createIcons();
+            createIcons({icons});
         }
 
         function renderBacklog() {
@@ -1440,7 +1342,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
                     personalSelect.onchange = (e) => { if (e.target.value) promoteBacklogToSeason(e.target.value, 'personal'); };
                 }
             }
-            lucide.createIcons();
+            createIcons({icons});
         }
 
         function renderDailyLogs() {
@@ -1471,7 +1373,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
                     `;
                 }).join('');
             }
-            lucide.createIcons();
+            createIcons({icons});
         }
 
         window.renderSeasonsView = renderSeasonsView;
@@ -1574,7 +1476,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
                     logBtn.className = "bg-zinc-900 dark:bg-zinc-700 text-white/40 dark:text-zinc-500 font-semibold px-5 rounded-lg flex items-center justify-center cursor-not-allowed";
                 }
             }
-            lucide.createIcons();
+            createIcons({icons});
         }
 
         window.togglePin = async function(id) {
@@ -1636,7 +1538,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
                 container.innerHTML = '<div class="p-8 text-center text-xs text-zinc-400 dark:text-zinc-500 italic">No items yet. Add one above.</div>';
                 document.getElementById('statsSubHeader').innerText = "No items tracked.";
                 syncActiveMonitorPanel();
-                lucide.createIcons();
+                createIcons({icons});
                 return;
             }
 
@@ -1677,7 +1579,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
 
             syncActiveMonitorPanel();
             refreshQuickNotesSidebar();
-            lucide.createIcons();
+            createIcons({icons});
         }
 
         function refreshQuickNotesSidebar() {
@@ -1795,7 +1697,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
                 const topicBreakdown = {};
                 
                 window.state.logs.forEach(log => {
-                    if (log.timestamp.split('T')[0] === currentLoopDateStr) {
+                    if (getLocalDateStr(log.timestamp) === currentLoopDateStr) {
                         const match = window.state.items.find(i => i.id === log.itemId);
                         if (match) {
                             if (match.type === 'habit') {
@@ -1867,7 +1769,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
             const habitAggregator = {};
             const topicAggregator = {};
             window.state.logs.forEach(log => {
-                const dateKey = log.timestamp.split('T')[0];
+                const dateKey = getLocalDateStr(log.timestamp);
                 const match = window.state.items.find(i => i.id === log.itemId);
                 if (match) {
                     if (match.type === 'habit') {
@@ -1918,8 +1820,8 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
                 const readableDate = workingDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                 let tooltipText = '';
                 if (totalSec > 0) {
-                    const habitDayLogs = window.state.logs.filter(log => log.timestamp.split('T')[0] === dateKey && window.state.items.find(i => i.id === log.itemId)?.type === 'habit');
-                    const topicDayLogs = window.state.logs.filter(log => log.timestamp.split('T')[0] === dateKey && window.state.items.find(i => i.id === log.itemId)?.type === 'topic');
+                    const habitDayLogs = window.state.logs.filter(log => getLocalDateStr(log.timestamp) === dateKey && window.state.items.find(i => i.id === log.itemId)?.type === 'habit');
+                    const topicDayLogs = window.state.logs.filter(log => getLocalDateStr(log.timestamp) === dateKey && window.state.items.find(i => i.id === log.itemId)?.type === 'topic');
                     
                     const habitDetails = {};
                     habitDayLogs.forEach(log => {
@@ -1989,7 +1891,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
                 `;
                 container.appendChild(card);
             });
-            lucide.createIcons();
+            createIcons({icons});
         }
 
         function openNoteEditor(id) {
@@ -2005,7 +1907,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
             document.getElementById('noteBodyInput').innerHTML = targetNote.body || '';
 
             renderNotesList();
-            lucide.createIcons();
+            createIcons({icons});
         }
 
         window.formatNoteText = function(command) {
@@ -2065,7 +1967,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
 
         window.addEventListener('DOMContentLoaded', () => {
             const loginIcons = document.querySelectorAll('#loginScreen [data-lucide]');
-            loginIcons.forEach(icon => lucide.createIcons({node: icon}));
+            loginIcons.forEach(icon => createIcons({icons, node: icon}));
         });
 
         if (typeof window.login !== 'function') {

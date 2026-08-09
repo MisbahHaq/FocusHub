@@ -4,6 +4,7 @@
  */
 
 import { escapeHtml } from '../utils/sanitize.js';
+import { getLocalDateStr } from '../utils/format.js';
 
 export function calculateSeasonRetrospective(season, logs = [], dailyLogs = [], habitLogs = []) {
     if (!season) return null;
@@ -56,12 +57,12 @@ export function calculateSeasonRetrospective(season, logs = [], dailyLogs = [], 
     const dayMs = 24 * 60 * 60 * 1000;
     for (let i = 0; i < totalDays; i++) {
         const currentMs = start + i * dayMs;
-        const dateStr = new Date(currentMs).toISOString().split('T')[0];
+        const dateStr = getLocalDateStr(currentMs);
         
         const hasHabit = seasonHabitLogs.some(h => h.date === dateStr);
-        const dayLog = seasonDailyLogs.find(d => (d.date || '').split('T')[0] === dateStr);
+        const dayLog = seasonDailyLogs.find(d => getLocalDateStr(d.date) === dateStr);
         const dayFocusSec = seasonLogs
-            .filter(l => (l.timestamp || '').split('T')[0] === dateStr)
+            .filter(l => getLocalDateStr(l.timestamp) === dateStr)
             .reduce((sum, l) => sum + (l.seconds || 0), 0);
 
         dayStrip.push({

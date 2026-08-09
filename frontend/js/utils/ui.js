@@ -1,4 +1,5 @@
 import { escapeHtml } from './sanitize.js';
+import { createIcons, icons } from 'lucide';
 
 export function showToast(message, type = 'info') {
     const toast = document.createElement('div');
@@ -52,8 +53,8 @@ export function playSound(src) {
 
 export function refreshIcons(container) {
     if (container) {
-        lucide.createIcons({ attrs: { class: [] } }, container);
+        createIcons({ icons, attrs: { class: [] } }, container);
     } else {
-        lucide.createIcons();
+        createIcons({ icons });
     }
 }

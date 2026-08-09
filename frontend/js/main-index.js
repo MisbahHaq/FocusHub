@@ -1,6 +1,8 @@
-import { toggleTheme, applySavedTheme } from './utils/theme.js';
-import * as lucide from 'lucide';
+import '../css/styles.css';
 
-lucide.createIcons();
+import { toggleTheme, applySavedTheme } from './utils/theme.js';
+import { createIcons, icons } from 'lucide';
+
+createIcons({icons});
 window.toggleTheme = toggleTheme;
 applySavedTheme();
