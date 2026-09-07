@@ -240,7 +240,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
             unsubscribers.push(unsubActiveTimer);
             if (coreGlobalLoop) clearInterval(coreGlobalLoop);
             coreGlobalLoop = setInterval(processingEngineCycle, 1000);
-            // Show main app immediately â€” don't block on animation.
+            // Show main app immediately — don't block on animation.
             // Kick off a quick non-blocking cross-fade so the transition feels smooth
             // without delaying data binding or subscriptions.
             if (animate) {
@@ -985,7 +985,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
                 window.showToast(`Imported ${imported} items.`);
             } catch(e) {
                 console.error("Import error:", e);
-                window.showToast("Import failed â€” check file format.", "warning");
+                window.showToast("Import failed — check file format.", "warning");
             }
             event.target.value = '';
         };
@@ -1236,7 +1236,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
                                     <h4 class="text-base font-bold text-zinc-900 dark:text-zinc-100">${escapeHtml(season.title)}</h4>
                                     ${statusBadge}
                                 </div>
-                                <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1">${formatDateRange(season.startDate, season.endDate)} â€¢ ${season.durationWeeks} weeks</p>
+                                <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1">${formatDateRange(season.startDate, season.endDate)} • ${season.durationWeeks} weeks</p>
                                 <div class="w-full bg-zinc-100 dark:bg-zinc-800 h-1.5 rounded-full mt-2 overflow-hidden">
                                     <div class="bg-zinc-900 dark:bg-zinc-100 h-full rounded-full" style="width: ${progress}%"></div>
                                 </div>
@@ -1263,7 +1263,7 @@ import { createStore, subscribe, showError, showConfirm } from './utils/state.js
 
             const progress = getSeasonProgress(season);
             document.getElementById('detailSeasonTitle').innerText = season.title;
-            document.getElementById('detailSeasonDates').innerText = `${formatDateRange(season.startDate, season.endDate)} â€¢ ${season.durationWeeks} weeks`;
+            document.getElementById('detailSeasonDates').innerText = `${formatDateRange(season.startDate, season.endDate)} • ${season.durationWeeks} weeks`;
             document.getElementById('detailSeasonProgress').innerText = `${progress}%`;
             document.getElementById('detailSeasonProgressBar').style.width = `${progress}%`;
             document.getElementById('detailSeasonStart').innerText = new Date(season.startDate).toLocaleDateString();
